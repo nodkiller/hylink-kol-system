@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
   type SortingState,
+  type OnChangeFn,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
 import { TierBadge, PlatformBadge, BlacklistedBadge } from '@/components/ui/Badge';
@@ -18,7 +19,7 @@ interface Props {
   limit: number;
   isLoading: boolean;
   sorting: SortingState;
-  onSortingChange: (s: SortingState) => void;
+  onSortingChange: OnChangeFn<SortingState>;
   onPageChange: (p: number) => void;
   onView: (kol: Kol) => void;
   onEdit: (kol: Kol) => void;

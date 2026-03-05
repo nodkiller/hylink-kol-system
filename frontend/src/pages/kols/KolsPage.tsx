@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { SortingState } from '@tanstack/react-table';
+import type { SortingState, Updater } from '@tanstack/react-table';
 import { kolsApi } from '@/api/kols.api';
 import KolFilterPanel from '@/components/kols/KolFilterPanel';
 import KolTable from '@/components/kols/KolTable';
@@ -51,7 +51,8 @@ export default function KolsPage() {
   });
 
   // Sync table sorting → query params
-  const handleSortingChange = useCallback((newSorting: SortingState) => {
+  const handleSortingChange = useCallback((updater: Updater<SortingState>) => {
+    const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
     setSorting(newSorting);
     if (newSorting.length > 0) {
       setFilters((f) => ({
@@ -63,7 +64,7 @@ export default function KolsPage() {
     } else {
       setFilters((f) => ({ ...f, sortBy: 'created_at', order: 'DESC', page: 1 }));
     }
-  }, []);
+  }, [sorting]);
 
   const handleOpenCreate = () => {
     setEditingKol(null);
