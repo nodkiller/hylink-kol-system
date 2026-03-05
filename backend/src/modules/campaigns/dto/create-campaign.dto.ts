@@ -1,10 +1,13 @@
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
+  Min,
   Validate,
   ValidatorConstraint,
   ValidatorConstraintInterface,

@@ -24,12 +24,12 @@ interface PaginationMeta {
   totalPages: number;
 }
 
-interface PaginatedCampaigns {
+export interface PaginatedCampaigns {
   data: Campaign[];
   meta: PaginationMeta;
 }
 
-interface AddKolsResult {
+export interface AddKolsResult {
   added: CampaignKol[];
   alreadyInCampaign: string[];      // kolIds already present
   notFound: string[];               // kolIds that don't exist in DB
@@ -65,7 +65,7 @@ export class CampaignsService {
   /** Set or clear the client portal password. */
   async updatePortalPassword(id: string, password: string | null): Promise<Campaign> {
     await this.findOne(id);
-    await this.campaignRepo.update(id, { clientPortalPassword: password ?? null });
+    await this.campaignRepo.update(id, { clientPortalPassword: password as unknown as string });
     return this.findOne(id);
   }
 
@@ -319,10 +319,10 @@ export class CampaignsService {
     }
 
     // Return the fully-populated updated record
-    return this.campaignKolRepo.findOne({
+    return (await this.campaignKolRepo.findOne({
       where: { campaignId, kolId },
       relations: ['kol', 'kol.platforms', 'assignedTo'],
-    });
+    }))!;
   }
 
   // ─── Private helpers ────────────────────────────────────────────────────────

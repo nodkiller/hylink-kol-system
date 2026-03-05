@@ -18,7 +18,7 @@ interface PaginationMeta {
   totalPages: number;
 }
 
-interface PaginatedKols {
+export interface PaginatedKols {
   data: Kol[];
   meta: PaginationMeta;
 }
@@ -70,10 +70,11 @@ export class KolsService {
       }
 
       // Re-fetch with relations for the response
-      return manager.findOne(Kol, {
+      const created = await manager.findOne(Kol, {
         where: { id: savedKol.id },
         relations: ['platforms', 'createdBy'],
       });
+      return created!;
     });
   }
 
@@ -183,10 +184,11 @@ export class KolsService {
         }
       }
 
-      return manager.findOne(Kol, {
+      const updated = await manager.findOne(Kol, {
         where: { id },
         relations: ['platforms', 'createdBy'],
       });
+      return updated!;
     });
   }
 
