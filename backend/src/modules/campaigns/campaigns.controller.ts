@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -18,6 +19,8 @@ import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CampaignQueryDto } from './dto/campaign-query.dto';
 import { AddKolsToCampaignDto } from './dto/add-kols-to-campaign.dto';
 import { UpdateCampaignKolDto } from './dto/update-campaign-kol.dto';
+import { CreateCampaignKolPostDto } from './dto/create-campaign-kol-post.dto';
+import { UpdateCampaignKolPostDto } from './dto/update-campaign-kol-post.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -162,5 +165,55 @@ export class CampaignsController {
     @Body() dto: UpdateCampaignKolDto,
   ) {
     return this.campaignsService.updateCampaignKol(campaignId, kolId, dto);
+  }
+
+  // ─── Post Results ───────────────────────────────────────────────────────────
+
+  /** GET /campaigns/:campaignId/kols/:kolId/posts */
+  @Get(':campaignId/kols/:kolId/posts')
+  getPostsForKol(
+    @Param('campaignId', ParseUUIDPipe) campaignId: string,
+    @Param('kolId', ParseUUIDPipe) kolId: string,
+  ) {
+    return this.campaignsService.getPostsForKol(campaignId, kolId);
+  }
+
+  /** POST /campaigns/:campaignId/kols/:kolId/posts */
+  @Post(':campaignId/kols/:kolId/posts')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  addPost(
+    @Param('campaignId', ParseUUIDPipe) campaignId: string,
+    @Param('kolId', ParseUUIDPipe) kolId: string,
+    @Body() dto: CreateCampaignKolPostDto,
+  ) {
+    return this.campaignsService.addPost(campaignId, kolId, dto);
+  }
+
+  /** PATCH /campaigns/:campaignId/kols/:kolId/posts/:postId */
+  @Patch(':campaignId/kols/:kolId/posts/:postId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
+  updatePost(
+    @Param('campaignId', ParseUUIDPipe) campaignId: string,
+    @Param('kolId', ParseUUIDPipe) kolId: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Body() dto: UpdateCampaignKolPostDto,
+  ) {
+    return this.campaignsService.updatePost(campaignId, kolId, postId, dto);
+  }
+
+  /** DELETE /campaigns/:campaignId/kols/:kolId/posts/:postId */
+  @Delete(':campaignId/kols/:kolId/posts/:postId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deletePost(
+    @Param('campaignId', ParseUUIDPipe) campaignId: string,
+    @Param('kolId', ParseUUIDPipe) kolId: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
+  ) {
+    return this.campaignsService.deletePost(campaignId, kolId, postId);
   }
 }

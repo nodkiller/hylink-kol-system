@@ -14,6 +14,9 @@ import { CampaignQueryDto } from './dto/campaign-query.dto';
 import { AddKolsToCampaignDto } from './dto/add-kols-to-campaign.dto';
 import { UpdateCampaignKolDto } from './dto/update-campaign-kol.dto';
 import { CampaignKolStatus } from '../../common/enums';
+import { CampaignKolPost } from './entities/campaign-kol-post.entity';
+import { CreateCampaignKolPostDto } from './dto/create-campaign-kol-post.dto';
+import { UpdateCampaignKolPostDto } from './dto/update-campaign-kol-post.dto';
 
 // ─── Response Types ────────────────────────────────────────────────────────────
 
@@ -56,6 +59,9 @@ export class CampaignsService {
 
     @InjectRepository(CampaignKol)
     private readonly campaignKolRepo: Repository<CampaignKol>,
+
+    @InjectRepository(CampaignKolPost)
+    private readonly postRepo: Repository<CampaignKolPost>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -323,6 +329,57 @@ export class CampaignsService {
       where: { campaignId, kolId },
       relations: ['kol', 'kol.platforms', 'assignedTo'],
     }))!;
+  }
+
+  // ─── Campaign KOL Posts ─────────────────────────────────────────────────────
+
+  /** Verify a campaign-KOL record exists — throws 404 otherwise. */
+  private async assertCampaignKolExists(campaignId: string, kolId: string) {
+    const record = await this.campaignKolRepo.findOne({ where: { campaignId, kolId } });
+    if (!record) {
+      throw new NotFoundException(`KOL "${kolId}" is not associated with campaign "${campaignId}"`);
+    }
+    return record;
+  }
+
+  async getPostsForKol(campaignId: string, kolId: string): Promise<CampaignKolPost[]> {
+    await this.assertCampaignKolExists(campaignId, kolId);
+    return this.postRepo.find({
+      where: { campaignId, kolId },
+      order: { postedAt: 'DESC', createdAt: 'DESC' },
+    });
+  }
+
+  async addPost(
+    campaignId: string,
+    kolId: string,
+    dto: CreateCampaignKolPostDto,
+  ): Promise<CampaignKolPost> {
+    await this.assertCampaignKolExists(campaignId, kolId);
+    const post = this.postRepo.create({ ...dto, campaignId, kolId });
+    return this.postRepo.save(post);
+  }
+
+  async updatePost(
+    campaignId: string,
+    kolId: string,
+    postId: string,
+    dto: UpdateCampaignKolPostDto,
+  ): Promise<CampaignKolPost> {
+    const post = await this.postRepo.findOne({ where: { id: postId, campaignId, kolId } });
+    if (!post) throw new NotFoundException(`Post "${postId}" not found`);
+
+    const updateData = Object.fromEntries(
+      Object.entries(dto).filter(([, v]) => v !== undefined),
+    );
+    await this.postRepo.update(postId, updateData);
+    return (await this.postRepo.findOne({ where: { id: postId } }))!;
+  }
+
+  async deletePost(campaignId: string, kolId: string, postId: string): Promise<void> {
+    const post = await this.postRepo.findOne({ where: { id: postId, campaignId, kolId } });
+    if (!post) throw new NotFoundException(`Post "${postId}" not found`);
+    await this.postRepo.delete(postId);
   }
 
   // ─── Private helpers ────────────────────────────────────────────────────────

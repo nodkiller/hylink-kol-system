@@ -45,3 +45,20 @@ export enum CampaignKolStatus {
   PUBLISHED = 'Published',
   COMPLETED = 'Completed',
 }
+
+export enum PostContentType {
+  STATIC_IMAGE = 'StaticImage',
+  CAROUSEL = 'Carousel',
+  REEL = 'Reel',
+  STORY = 'Story',
+  YOUTUBE_SHORT = 'YouTube_Short',
+  YOUTUBE_VIDEO = 'YouTube_Video',
+  TIKTOK_VIDEO = 'TikTok_Video',
+  OTHER = 'Other',
+}
+
+export enum PostSentiment {
+  POSITIVE = 'Positive',
+  NEUTRAL = 'Neutral',
+  NEGATIVE = 'Negative',
+}

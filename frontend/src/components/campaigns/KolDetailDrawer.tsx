@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { campaignsApi, type CampaignKolRecord } from '@/api/campaigns.api';
 import { CampaignKolStatus } from '@/types';
 import clsx from 'clsx';
+import PostResultsSection from './PostResultsSection';
 
 interface Props {
   record: CampaignKolRecord | null;
@@ -119,8 +120,6 @@ export default function KolDetailDrawer({ record, campaignId, onClose }: Props) 
   const [isPaid, setIsPaid] = useState(false);
   const [invoiceRef, setInvoiceRef] = useState('');
   const [deliverables, setDeliverables] = useState<Record<string, unknown>>({});
-  const [publishedUrls, setPublishedUrls] = useState<string[]>([]);
-  const [performanceData, setPerformanceData] = useState<Record<string, unknown>>({});
   const [notes, setNotes] = useState('');
 
   // Sync local state when record changes
@@ -131,8 +130,6 @@ export default function KolDetailDrawer({ record, campaignId, onClose }: Props) 
     setIsPaid(record.isPaid ?? false);
     setInvoiceRef(record.invoiceRef ?? '');
     setDeliverables(record.deliverables ?? {});
-    setPublishedUrls(record.publishedUrls ?? []);
-    setPerformanceData(record.performanceData ?? {});
     setNotes(record.notes ?? '');
   }, [record]);
 
@@ -152,8 +149,6 @@ export default function KolDetailDrawer({ record, campaignId, onClose }: Props) 
       isPaid,
       invoiceRef: invoiceRef || undefined,
       deliverables,
-      publishedUrls,
-      performanceData,
       notes,
     });
   };
@@ -336,14 +331,19 @@ export default function KolDetailDrawer({ record, campaignId, onClose }: Props) 
             />
           </div>
 
-          {/* Published URLs */}
-          <UrlListEditor urls={publishedUrls} onChange={setPublishedUrls} />
-
           {/* Deliverables (JSON) */}
           <JsonTextarea label="Deliverables (JSON)" value={deliverables} onChange={setDeliverables} />
 
-          {/* Performance data (JSON) */}
-          <JsonTextarea label="Performance Data (JSON)" value={performanceData} onChange={setPerformanceData} />
+          {/* Post Results — structured per-post metrics */}
+          <div className="border-t border-gray-800 pt-5">
+            {record && (
+              <PostResultsSection
+                campaignId={campaignId}
+                kolId={record.kolId}
+                kolPlatforms={record.kol?.platforms}
+              />
+            )}
+          </div>
 
           {/* Meta */}
           {record && (

@@ -43,6 +43,46 @@ export enum CampaignKolStatus {
   COMPLETED = 'Completed',
 }
 
+export enum PostContentType {
+  STATIC_IMAGE = 'StaticImage',
+  CAROUSEL = 'Carousel',
+  REEL = 'Reel',
+  STORY = 'Story',
+  YOUTUBE_SHORT = 'YouTube_Short',
+  YOUTUBE_VIDEO = 'YouTube_Video',
+  TIKTOK_VIDEO = 'TikTok_Video',
+  OTHER = 'Other',
+}
+
+export enum PostSentiment {
+  POSITIVE = 'Positive',
+  NEUTRAL = 'Neutral',
+  NEGATIVE = 'Negative',
+}
+
+export interface CampaignKolPost {
+  id: string;
+  campaignId: string;
+  kolId: string;
+  postUrl: string;
+  platform: string;
+  contentType: PostContentType;
+  postedAt?: string;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  saves?: number;
+  clicks?: number;
+  conversions?: number;
+  attributedSales?: number;
+  emv?: number;
+  sentiment?: PostSentiment;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Entity Types ──────────────────────────────────────────────────────────────
 
 export interface User {
