@@ -23,6 +23,7 @@ interface Props {
   onPageChange: (p: number) => void;
   onView: (kol: Kol) => void;
   onEdit: (kol: Kol) => void;
+  onRowClick?: (kol: Kol) => void;
 }
 
 const helper = createColumnHelper<Kol>();
@@ -61,7 +62,7 @@ function StarRating({ value }: { value?: number }) {
 
 export default function KolTable({
   data, total, page, limit, isLoading,
-  sorting, onSortingChange, onPageChange, onView, onEdit,
+  sorting, onSortingChange, onPageChange, onView, onEdit, onRowClick,
 }: Props) {
   const columns = [
     helper.accessor('name', {
@@ -163,7 +164,7 @@ export default function KolTable({
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => onView(row.original)}
             title="View details"
@@ -259,8 +260,10 @@ export default function KolTable({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
+                  onClick={() => onRowClick?.(row.original)}
                   className={clsx(
                     'transition-colors hover:bg-gray-800/50',
+                    onRowClick && 'cursor-pointer',
                     row.original.isBlacklisted && 'opacity-60',
                   )}
                 >

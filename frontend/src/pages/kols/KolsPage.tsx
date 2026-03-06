@@ -5,6 +5,7 @@ import { kolsApi } from '@/api/kols.api';
 import KolFilterPanel from '@/components/kols/KolFilterPanel';
 import KolTable from '@/components/kols/KolTable';
 import KolFormModal from '@/components/kols/KolFormModal';
+import KolViewDrawer from '@/components/kols/KolViewDrawer';
 import type { Kol, KolQueryParams } from '@/types';
 
 const DEFAULT_FILTERS: KolQueryParams = {
@@ -40,6 +41,7 @@ export default function KolsPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingKol, setEditingKol] = useState<Kol | null>(null);
+  const [viewingKol, setViewingKol] = useState<Kol | null>(null);
 
   // Debounce text fields (search, city, language, tags) to avoid excess requests
   const debouncedFilters = useDebounce(filters, 400);
@@ -72,13 +74,9 @@ export default function KolsPage() {
   };
 
   const handleOpenEdit = (kol: Kol) => {
+    setViewingKol(null); // close drawer if open
     setEditingKol(kol);
     setModalOpen(true);
-  };
-
-  const handleView = (kol: Kol) => {
-    // TODO: navigate to detail page in a future sprint
-    console.info('View KOL:', kol.id);
   };
 
   const kolList = data?.data ?? [];
@@ -132,10 +130,18 @@ export default function KolsPage() {
           sorting={sorting}
           onSortingChange={handleSortingChange}
           onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
-          onView={handleView}
+          onView={setViewingKol}
           onEdit={handleOpenEdit}
+          onRowClick={setViewingKol}
         />
       </div>
+
+      {/* KOL detail drawer */}
+      <KolViewDrawer
+        kol={viewingKol}
+        onClose={() => setViewingKol(null)}
+        onEdit={handleOpenEdit}
+      />
 
       {/* Add / Edit modal */}
       <KolFormModal
