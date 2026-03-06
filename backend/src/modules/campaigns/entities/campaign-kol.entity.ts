@@ -4,12 +4,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { CampaignKolStatus, ClientFeedback } from '../../../common/enums';
 import { Campaign } from './campaign.entity';
+import { CampaignKolPost } from './campaign-kol-post.entity';
 import { Kol } from '../../kols/entities/kol.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -108,4 +110,7 @@ export class CampaignKol {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @OneToMany(() => CampaignKolPost, (p) => p.campaignKol)
+  posts: CampaignKolPost[];
 }
