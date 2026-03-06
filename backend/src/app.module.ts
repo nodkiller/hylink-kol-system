@@ -15,6 +15,7 @@ import { Kol } from './modules/kols/entities/kol.entity';
 import { KolPlatform } from './modules/kols/entities/kol-platform.entity';
 import { Campaign } from './modules/campaigns/entities/campaign.entity';
 import { CampaignKol } from './modules/campaigns/entities/campaign-kol.entity';
+import { CampaignKolPost } from './modules/campaigns/entities/campaign-kol-post.entity';
 import { PortalModule } from './modules/portal/portal.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { InfluencerSearchModule } from './modules/influencer-search/influencer-search.module';
@@ -41,7 +42,7 @@ import { InfluencerSearchModule } from './modules/influencer-search/influencer-s
           return {
             type: 'postgres',
             url: databaseUrl,
-            entities: [User, Kol, KolPlatform, Campaign, CampaignKol],
+            entities: [User, Kol, KolPlatform, Campaign, CampaignKol, CampaignKolPost],
             synchronize: config.get<boolean>('DB_SYNCHRONIZE', true),
             logging: false,
             ssl,
@@ -56,7 +57,7 @@ import { InfluencerSearchModule } from './modules/influencer-search/influencer-s
           username: config.get<string>('DB_USERNAME', 'postgres'),
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_DATABASE', 'hylink_kol'),
-          entities: [User, Kol, KolPlatform, Campaign, CampaignKol],
+          entities: [User, Kol, KolPlatform, Campaign, CampaignKol, CampaignKolPost],
           synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
           logging: config.get<boolean>('DB_LOGGING', false),
           ssl,
