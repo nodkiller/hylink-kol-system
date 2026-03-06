@@ -25,17 +25,17 @@ interface ColumnConfig {
 }
 
 const COLUMNS: ColumnConfig[] = [
-  { status: CampaignKolStatus.SHORTLISTED,         label: 'Shortlisted',          color: 'text-slate-600',   bg: 'bg-slate-50' },
-  { status: CampaignKolStatus.SUBMITTED_TO_CLIENT, label: 'Submitted',            color: 'text-blue-600',    bg: 'bg-blue-50' },
-  { status: CampaignKolStatus.APPROVED_BY_CLIENT,  label: 'Client ✓',             color: 'text-green-600',   bg: 'bg-green-50' },
-  { status: CampaignKolStatus.REJECTED_BY_CLIENT,  label: 'Client ✗',             color: 'text-red-600',     bg: 'bg-red-50' },
-  { status: CampaignKolStatus.CONTACTED,            label: 'Contacted',            color: 'text-yellow-700',  bg: 'bg-yellow-50' },
-  { status: CampaignKolStatus.NEGOTIATING,          label: 'Negotiating',          color: 'text-orange-600',  bg: 'bg-orange-50' },
-  { status: CampaignKolStatus.CONTRACTED,           label: 'Contracted',           color: 'text-indigo-600',  bg: 'bg-indigo-50' },
-  { status: CampaignKolStatus.CONTENT_SUBMITTED,   label: 'Content In',           color: 'text-purple-600',  bg: 'bg-purple-50' },
-  { status: CampaignKolStatus.CONTENT_APPROVED,    label: 'Content ✓',            color: 'text-teal-600',    bg: 'bg-teal-50' },
-  { status: CampaignKolStatus.PUBLISHED,            label: 'Published',            color: 'text-pink-600',    bg: 'bg-pink-50' },
-  { status: CampaignKolStatus.COMPLETED,            label: 'Completed',            color: 'text-gray-600',    bg: 'bg-gray-100' },
+  { status: CampaignKolStatus.SHORTLISTED,         label: 'Shortlisted',          color: 'text-slate-400',   bg: 'bg-slate-900/30' },
+  { status: CampaignKolStatus.SUBMITTED_TO_CLIENT, label: 'Submitted',            color: 'text-blue-400',    bg: 'bg-blue-900/30' },
+  { status: CampaignKolStatus.APPROVED_BY_CLIENT,  label: 'Client ✓',             color: 'text-green-400',   bg: 'bg-green-900/30' },
+  { status: CampaignKolStatus.REJECTED_BY_CLIENT,  label: 'Client ✗',             color: 'text-red-400',     bg: 'bg-red-900/30' },
+  { status: CampaignKolStatus.CONTACTED,            label: 'Contacted',            color: 'text-yellow-400',  bg: 'bg-yellow-900/30' },
+  { status: CampaignKolStatus.NEGOTIATING,          label: 'Negotiating',          color: 'text-orange-400',  bg: 'bg-orange-900/30' },
+  { status: CampaignKolStatus.CONTRACTED,           label: 'Contracted',           color: 'text-indigo-400',  bg: 'bg-indigo-900/30' },
+  { status: CampaignKolStatus.CONTENT_SUBMITTED,   label: 'Content In',           color: 'text-purple-400',  bg: 'bg-purple-900/30' },
+  { status: CampaignKolStatus.CONTENT_APPROVED,    label: 'Content ✓',            color: 'text-teal-400',    bg: 'bg-teal-900/30' },
+  { status: CampaignKolStatus.PUBLISHED,            label: 'Published',            color: 'text-pink-400',    bg: 'bg-pink-900/30' },
+  { status: CampaignKolStatus.COMPLETED,            label: 'Completed',            color: 'text-gray-400',    bg: 'bg-gray-800/50' },
 ];
 
 // ─── Draggable KOL Card ───────────────────────────────────────────────────────
@@ -71,21 +71,21 @@ function KolCard({
         if (!isDragging && onClick) { e.stopPropagation(); onClick(); }
       }}
       className={clsx(
-        'rounded-lg border bg-white p-3 shadow-sm select-none transition-shadow',
+        'rounded-lg border border-gray-700 bg-gray-800 p-3 shadow-sm select-none transition-shadow',
         isDragOverlay
           ? 'rotate-2 shadow-xl opacity-95 cursor-grabbing'
           : isDragging
             ? 'opacity-30'
-            : 'cursor-grab hover:shadow-md hover:border-primary-200',
+            : 'cursor-grab hover:shadow-md hover:border-primary-500/50',
       )}
     >
       {/* KOL name + blacklist */}
       <div className="flex items-start gap-2">
-        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700 text-xs font-bold">
+        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-900/50 text-primary-300 text-xs font-bold border border-primary-700/40">
           {kol.name.charAt(0)}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-900 truncate">{kol.name}</p>
+          <p className="text-sm font-medium text-gray-100 truncate">{kol.name}</p>
           {kol.nickname && <p className="text-xs text-gray-400 truncate">@{kol.nickname}</p>}
         </div>
       </div>
@@ -93,7 +93,7 @@ function KolCard({
       {/* Platform & followers */}
       {topPlatform && (
         <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
-          <span className="font-medium text-gray-700">{topPlatform.platformName}</span>
+          <span className="font-medium text-gray-300">{topPlatform.platformName}</span>
           {topPlatform.followersCount && (
             <span>· {topPlatform.followersCount >= 1000
               ? `${(topPlatform.followersCount / 1000).toFixed(0)}K`
@@ -105,14 +105,14 @@ function KolCard({
 
       {/* Negotiated fee (if set) */}
       {record.negotiatedFee && (
-        <div className="mt-2 text-xs font-semibold text-green-700">
+        <div className="mt-2 text-xs font-semibold text-green-400">
           AUD ${record.negotiatedFee.toLocaleString()}
         </div>
       )}
 
       {/* Client feedback indicator */}
       {record.clientFeedback && (
-        <div className={clsx('mt-2 text-xs font-medium', record.clientFeedback === 'Approved' ? 'text-green-600' : 'text-red-600')}>
+        <div className={clsx('mt-2 text-xs font-medium', record.clientFeedback === 'Approved' ? 'text-green-400' : 'text-red-400')}>
           {record.clientFeedback === 'Approved' ? '✓ Client approved' : '✗ Client rejected'}
         </div>
       )}
@@ -134,12 +134,12 @@ function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({ id: config.status });
 
   return (
-    <div className="flex w-56 flex-shrink-0 flex-col rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+    <div className="flex w-56 flex-shrink-0 flex-col rounded-xl border border-gray-700 bg-gray-900 overflow-hidden">
       {/* Column header */}
-      <div className={clsx('px-3 py-2.5 border-b border-gray-200', config.bg)}>
+      <div className={clsx('px-3 py-2.5 border-b border-gray-700', config.bg)}>
         <div className="flex items-center justify-between">
           <span className={clsx('text-xs font-semibold', config.color)}>{config.label}</span>
-          <span className="text-xs font-medium text-gray-400 bg-white rounded-full px-2 py-0.5 border border-gray-200">
+          <span className="text-xs font-medium text-gray-500 bg-gray-800 rounded-full px-2 py-0.5 border border-gray-700">
             {records.length}
           </span>
         </div>
@@ -150,14 +150,14 @@ function KanbanColumn({
         ref={setNodeRef}
         className={clsx(
           'flex-1 space-y-2 p-2 min-h-[120px] transition-colors',
-          isOver && 'bg-primary-50 ring-2 ring-inset ring-primary-300 rounded-b-xl',
+          isOver && 'bg-primary-900/20 ring-2 ring-inset ring-primary-500/40 rounded-b-xl',
         )}
       >
         {records.map((r) => (
           <KolCard key={r.kolId} record={r} onClick={() => onCardClick(r)} />
         ))}
         {records.length === 0 && (
-          <div className={clsx('flex items-center justify-center h-16 rounded-lg border-2 border-dashed text-xs', isOver ? 'border-primary-300 text-primary-400' : 'border-gray-200 text-gray-300')}>
+          <div className={clsx('flex items-center justify-center h-16 rounded-lg border-2 border-dashed text-xs', isOver ? 'border-primary-500/50 text-primary-400' : 'border-gray-700 text-gray-600')}>
             Drop here
           </div>
         )}

@@ -8,14 +8,14 @@ interface BadgeProps {
 }
 
 const VARIANT_CLASS = {
-  gray:   'bg-gray-100 text-gray-700 ring-gray-200',
-  green:  'bg-green-100 text-green-700 ring-green-200',
-  blue:   'bg-blue-100 text-blue-700 ring-blue-200',
-  purple: 'bg-purple-100 text-purple-700 ring-purple-200',
-  orange: 'bg-orange-100 text-orange-700 ring-orange-200',
-  red:    'bg-red-100 text-red-700 ring-red-200',
-  yellow: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
-  pink:   'bg-pink-100 text-pink-700 ring-pink-200',
+  gray:   'bg-gray-800 text-gray-300 ring-gray-700',
+  green:  'bg-green-900/40 text-green-400 ring-green-700/50',
+  blue:   'bg-blue-900/40 text-blue-400 ring-blue-700/50',
+  purple: 'bg-purple-900/40 text-purple-400 ring-purple-700/50',
+  orange: 'bg-orange-900/40 text-orange-400 ring-orange-700/50',
+  red:    'bg-red-900/40 text-red-400 ring-red-700/50',
+  yellow: 'bg-yellow-900/40 text-yellow-400 ring-yellow-700/50',
+  pink:   'bg-pink-900/40 text-pink-400 ring-pink-700/50',
 };
 
 export function Badge({ children, variant = 'gray', size = 'sm' }: BadgeProps) {

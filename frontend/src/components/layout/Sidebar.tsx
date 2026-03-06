@@ -67,8 +67,8 @@ export default function Sidebar() {
               clsx(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary-600/20 text-primary-400'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                  ? 'bg-primary-500/15 text-primary-300 border border-primary-500/20'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white border border-transparent',
               )
             }
           >

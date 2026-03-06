@@ -39,7 +39,7 @@ export default function Pagination({
           <button
             disabled={page === 1}
             onClick={() => onPageChange(page - 1)}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -57,7 +57,7 @@ export default function Pagination({
                   'h-8 min-w-[2rem] rounded-lg px-2 text-sm font-medium transition-colors',
                   p === page
                     ? 'bg-primary-600 text-white'
-                    : 'text-gray-600 hover:bg-gray-100',
+                    : 'text-gray-400 hover:bg-gray-800',
                 )}
               >
                 {p}
@@ -68,7 +68,7 @@ export default function Pagination({
           <button
             disabled={page === totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

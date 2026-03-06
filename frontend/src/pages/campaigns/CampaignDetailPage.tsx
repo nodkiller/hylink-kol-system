@@ -95,26 +95,26 @@ function AddKolsModal({
         ) : kols.length === 0 ? (
           <div className="py-8 text-center text-sm text-gray-400">No KOLs found</div>
         ) : (
-          <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 rounded-xl border border-gray-200">
+          <div className="max-h-80 overflow-y-auto divide-y divide-gray-800 rounded-xl border border-gray-700">
             {kols.map((kol) => {
               const top = kol.platforms?.sort((a, b) => (b.followersCount ?? 0) - (a.followersCount ?? 0))[0];
               const isChecked = selected.has(kol.id);
               return (
                 <label
                   key={kol.id}
-                  className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => toggle(kol.id)}
-                    className="h-4 w-4 rounded accent-primary-600"
+                    className="h-4 w-4 rounded accent-primary-500"
                   />
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700 text-xs font-bold">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-900/50 text-primary-300 text-xs font-bold border border-primary-700/40">
                     {kol.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{kol.name}</p>
+                    <p className="text-sm font-medium text-gray-100 truncate">{kol.name}</p>
                     {top && (
                       <p className="text-xs text-gray-400 truncate">
                         {top.platformName}
@@ -123,7 +123,7 @@ function AddKolsModal({
                     )}
                   </div>
                   {kol.kolTier && (
-                    <span className="flex-shrink-0 rounded-full bg-primary-50 px-2 py-0.5 text-xs text-primary-700">
+                    <span className="flex-shrink-0 rounded-full bg-primary-900/40 px-2 py-0.5 text-xs text-primary-400">
                       {kol.kolTier}
                     </span>
                   )}
@@ -195,7 +195,7 @@ export default function CampaignDetailPage() {
       <div className="mb-6">
         <button
           onClick={() => navigate('/campaigns')}
-          className="mb-3 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          className="mb-3 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -206,7 +206,7 @@ export default function CampaignDetailPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-gray-900">{campaign.name}</h1>
+              <h1 className="text-2xl font-bold text-white">{campaign.name}</h1>
               <Badge variant={STATUS_VARIANT[campaign.status] ?? 'gray'}>{campaign.status}</Badge>
             </div>
             <p className="mt-0.5 text-sm text-gray-500">{campaign.clientName}</p>
@@ -281,7 +281,7 @@ export default function CampaignDetailPage() {
               {records.length} total
             </span>
             {Object.entries(summary).map(([status, count]) => (
-              <span key={status} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600">
+              <span key={status} className="rounded-full bg-gray-800 px-2.5 py-1 text-xs text-gray-400">
                 {status.replace(/_/g, ' ')}: <strong>{count}</strong>
               </span>
             ))}

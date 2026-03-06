@@ -55,16 +55,16 @@ export default function Modal({
       {/* Panel */}
       <div
         className={clsx(
-          'relative w-full rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]',
+          'relative w-full rounded-2xl bg-gray-900 border border-gray-700 shadow-2xl flex flex-col max-h-[90vh]',
           SIZE_CLASS[size],
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
-          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 flex-shrink-0">
+          <h2 className="text-base font-semibold text-gray-100">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-800 hover:text-gray-300 transition-colors"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -77,7 +77,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4 flex-shrink-0">
+          <div className="flex items-center justify-end gap-3 border-t border-gray-800 px-6 py-4 flex-shrink-0">
             {footer}
           </div>
         )}

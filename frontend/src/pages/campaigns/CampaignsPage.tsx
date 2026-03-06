@@ -21,12 +21,12 @@ function CampaignCard({ campaign, onClick }: { campaign: Campaign; onClick: () =
   return (
     <div
       onClick={onClick}
-      className="card p-5 cursor-pointer hover:shadow-md hover:border-primary-200 transition-all group"
+      className="card p-5 cursor-pointer hover:shadow-md hover:border-primary-500/40 transition-all group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-gray-900 group-hover:text-primary-700 truncate transition-colors">
+            <h3 className="font-semibold text-gray-100 group-hover:text-primary-300 truncate transition-colors">
               {campaign.name}
             </h3>
             <Badge variant={STATUS_VARIANT[campaign.status as CampaignStatus] ?? 'gray'}>
@@ -44,7 +44,7 @@ function CampaignCard({ campaign, onClick }: { campaign: Campaign; onClick: () =
       {total > 0 && (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {Object.entries(summary).map(([status, count]) => (
-            <span key={status} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            <span key={status} className="rounded-full bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
               {status.replace(/_/g, ' ')}: <strong>{count}</strong>
             </span>
           ))}
@@ -86,7 +86,7 @@ export default function CampaignsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
+          <h1 className="text-2xl font-bold text-white">Campaigns</h1>
           <p className="mt-0.5 text-sm text-gray-500">{campaigns.length} campaign{campaigns.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => { setEditCampaign(null); setModalOpen(true); }} className="btn-primary gap-2">
@@ -98,15 +98,15 @@ export default function CampaignsPage() {
       </div>
 
       {/* Status filter tabs */}
-      <div className="flex gap-1 mb-5 border-b border-gray-200">
+      <div className="flex gap-1 mb-5 border-b border-gray-800">
         {['', ...Object.values(CampaignStatus)].map((s) => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
               statusFilter === s
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary-400 text-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
             }`}
           >
             {s || 'All'}
@@ -118,7 +118,7 @@ export default function CampaignsPage() {
         <PageSpinner />
       ) : campaigns.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-          <svg className="h-10 w-10 mb-3 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="h-10 w-10 mb-3 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <p className="text-sm">No campaigns yet</p>

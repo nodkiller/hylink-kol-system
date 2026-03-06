@@ -28,7 +28,7 @@ export default function KolFilterPanel({ filters, onChange, onReset }: Props) {
       {/* Header */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center justify-between px-5 py-4 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors rounded-xl"
+        className="flex w-full items-center justify-between px-5 py-4 text-sm font-medium text-gray-300 hover:bg-gray-800/50 transition-colors rounded-xl"
       >
         <div className="flex items-center gap-2">
           <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -50,7 +50,7 @@ export default function KolFilterPanel({ filters, onChange, onReset }: Props) {
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-100 px-5 pb-5 pt-4">
+        <div className="border-t border-gray-800 px-5 pb-5 pt-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
             {/* Search */}

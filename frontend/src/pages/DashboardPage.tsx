@@ -91,9 +91,9 @@ function KpiCard({ label, value, sub, color, icon }: {
         {KPI_ICONS[icon]}
       </div>
       <div className="mt-3">
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-sm font-medium text-gray-700">{label}</p>
-        {sub && <p className="mt-0.5 text-xs text-gray-400">{sub}</p>}
+        <p className="text-2xl font-bold text-white">{value}</p>
+        <p className="text-sm font-medium text-gray-300">{label}</p>
+        {sub && <p className="mt-0.5 text-xs text-gray-500">{sub}</p>}
       </div>
     </div>
   );
@@ -139,7 +139,7 @@ function CampaignStatusPie({ data }: { data: Record<string, number> }) {
         </Pie>
         <Tooltip
           formatter={(v: number) => [v, 'Campaigns']}
-          contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+          contentStyle={{ borderRadius: '8px', border: '1px solid #374151', fontSize: '12px', backgroundColor: '#1f2937', color: '#f3f4f6' }}
         />
         <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
       </PieChart>
@@ -183,18 +183,18 @@ function PipelineBar({ data }: { data: Record<string, number> }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={chartData} margin={{ top: 4, right: 8, left: -22, bottom: 65 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
         <XAxis
           dataKey="name"
-          tick={{ fontSize: 9, fill: '#6b7280' }}
+          tick={{ fontSize: 9, fill: '#9ca3af' }}
           angle={-38}
           textAnchor="end"
           interval={0}
         />
-        <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} allowDecimals={false} />
+        <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} allowDecimals={false} />
         <Tooltip
           formatter={(v: number) => [v, 'KOLs']}
-          contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+          contentStyle={{ borderRadius: '8px', border: '1px solid #374151', fontSize: '12px', backgroundColor: '#1f2937', color: '#f3f4f6' }}
         />
         <Bar dataKey="value" radius={[4, 4, 0, 0]}>
           {chartData.map((entry, i) => (
@@ -220,10 +220,10 @@ function MonthlyTrendChart({ data }: { data: DashboardStats['monthlyTrend'] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <ComposedChart data={data} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-        <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#6b7280' }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+        <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} />
         <YAxis
-          tick={{ fontSize: 10, fill: '#6b7280' }}
+          tick={{ fontSize: 10, fill: '#9ca3af' }}
           tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
         />
         <Tooltip
@@ -231,10 +231,10 @@ function MonthlyTrendChart({ data }: { data: DashboardStats['monthlyTrend'] }) {
             `$${v.toLocaleString('en-AU')}`,
             name === 'revenue' ? 'Revenue' : name === 'kolCost' ? 'KOL Cost' : 'Net Profit',
           ]}
-          contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+          contentStyle={{ borderRadius: '8px', border: '1px solid #374151', fontSize: '12px', backgroundColor: '#1f2937', color: '#f3f4f6' }}
         />
-        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px' }} />
-        <Area type="monotone" dataKey="revenue" fill="#ede9fe" stroke="#8b5cf6" strokeWidth={2} name="Revenue" />
+        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#d1d5db' }} />
+        <Area type="monotone" dataKey="revenue" fill="#4c1d95" stroke="#8b5cf6" strokeWidth={2} name="Revenue" />
         <Bar dataKey="kolCost" fill="#fca5a5" radius={[3, 3, 0, 0]} name="KOL Cost" />
         <Line type="monotone" dataKey="netProfit" stroke="#10b981" strokeWidth={2} dot={false} name="Net Profit" />
       </ComposedChart>
@@ -276,14 +276,14 @@ function CampaignPnlTable({ rows }: { rows: CampaignPnl[] }) {
 
   return (
     <div className="card overflow-hidden">
-      <div className="border-b border-gray-100 px-5 py-4">
-        <h3 className="text-sm font-semibold text-gray-800">Campaign P&amp;L</h3>
-        <p className="mt-0.5 text-xs text-gray-400">Revenue vs costs per campaign — click to open</p>
+      <div className="border-b border-gray-800 px-5 py-4">
+        <h3 className="text-sm font-semibold text-gray-100">Campaign P&amp;L</h3>
+        <p className="mt-0.5 text-xs text-gray-500">Revenue vs costs per campaign — click to open</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 text-left text-xs text-gray-500 uppercase tracking-wide">
+            <tr className="border-b border-gray-800 bg-gray-800/50 text-left text-xs text-gray-500 uppercase tracking-wide">
               <th className="px-5 py-3 font-semibold">Campaign</th>
               <th className="px-3 py-3 font-semibold">Status</th>
               <th className="px-3 py-3 font-semibold text-right cursor-pointer select-none" onClick={() => handleSort('revenue')}>
@@ -301,7 +301,7 @@ function CampaignPnlTable({ rows }: { rows: CampaignPnl[] }) {
               <th className="px-3 py-3 font-semibold text-right">KOLs</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-800">
             {sorted.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-400">
@@ -313,34 +313,34 @@ function CampaignPnlTable({ rows }: { rows: CampaignPnl[] }) {
               <tr
                 key={c.id}
                 onClick={() => navigate(`/campaigns/${c.id}`)}
-                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                className="hover:bg-gray-800/50 cursor-pointer transition-colors"
               >
                 <td className="px-5 py-3">
-                  <p className="font-medium text-gray-900 truncate max-w-[180px]">{c.name}</p>
+                  <p className="font-medium text-gray-100 truncate max-w-[180px]">{c.name}</p>
                   <p className="text-xs text-gray-400 truncate max-w-[180px]">{c.clientName}</p>
                 </td>
                 <td className="px-3 py-3">
                   <Badge variant={STATUS_VARIANT[c.status] ?? 'gray'}>{c.status}</Badge>
                 </td>
-                <td className="px-3 py-3 text-right font-medium text-gray-800">
-                  {c.revenue > 0 ? fmt(c.revenue) : <span className="text-gray-300">—</span>}
+                <td className="px-3 py-3 text-right font-medium text-gray-200">
+                  {c.revenue > 0 ? fmt(c.revenue) : <span className="text-gray-600">—</span>}
                 </td>
-                <td className="px-3 py-3 text-right text-gray-600">
-                  {c.kolCost > 0 ? fmt(c.kolCost) : <span className="text-gray-300">—</span>}
+                <td className="px-3 py-3 text-right text-gray-400">
+                  {c.kolCost > 0 ? fmt(c.kolCost) : <span className="text-gray-600">—</span>}
                 </td>
                 <td className="px-3 py-3 text-right font-medium">
                   {c.revenue > 0 || c.kolCost > 0 ? (
-                    <span className={c.grossProfit >= 0 ? 'text-emerald-600' : 'text-red-500'}>
+                    <span className={c.grossProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}>
                       {fmt(c.grossProfit)}
                     </span>
-                  ) : <span className="text-gray-300">—</span>}
+                  ) : <span className="text-gray-600">—</span>}
                 </td>
                 <td className="px-3 py-3 text-right font-medium">
                   {c.revenue > 0 || c.kolCost > 0 ? (
-                    <span className={c.netProfit >= 0 ? 'text-emerald-600' : 'text-red-500'}>
+                    <span className={c.netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}>
                       {fmt(c.netProfit)}
                     </span>
-                  ) : <span className="text-gray-300">—</span>}
+                  ) : <span className="text-gray-600">—</span>}
                 </td>
                 <td className="px-3 py-3 text-right text-gray-500">{c.kolCount}</td>
               </tr>
@@ -359,21 +359,21 @@ function RecentCampaigns({ campaigns }: { campaigns: DashboardStats['recentCampa
 
   return (
     <div className="card overflow-hidden">
-      <div className="border-b border-gray-100 px-5 py-4">
-        <h3 className="text-sm font-semibold text-gray-800">Recent Campaigns</h3>
+      <div className="border-b border-gray-800 px-5 py-4">
+        <h3 className="text-sm font-semibold text-gray-100">Recent Campaigns</h3>
       </div>
       {campaigns.length === 0 ? (
-        <div className="px-5 py-10 text-center text-sm text-gray-400">No campaigns yet</div>
+        <div className="px-5 py-10 text-center text-sm text-gray-500">No campaigns yet</div>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-gray-800">
           {campaigns.map((c) => (
             <button
               key={c.id}
               onClick={() => navigate(`/campaigns/${c.id}`)}
-              className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors text-left"
+              className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-gray-800/50 transition-colors text-left"
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate">{c.name}</p>
+                <p className="text-sm font-medium text-gray-100 truncate">{c.name}</p>
                 <p className="text-xs text-gray-400 truncate">{c.clientName}</p>
               </div>
               <div className="ml-3 flex flex-shrink-0 items-center gap-2">
@@ -384,10 +384,10 @@ function RecentCampaigns({ campaigns }: { campaigns: DashboardStats['recentCampa
           ))}
         </div>
       )}
-      <div className="border-t border-gray-100 px-5 py-3">
+      <div className="border-t border-gray-800 px-5 py-3">
         <button
           onClick={() => navigate('/campaigns')}
-          className="text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
+          className="text-xs font-medium text-primary-400 hover:text-primary-300 transition-colors"
         >
           View all campaigns →
         </button>
@@ -418,7 +418,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-white">
           {greeting}, {user?.fullName?.split(' ')[0] ?? 'there'}
         </h1>
         <p className="mt-0.5 text-sm text-gray-500">
@@ -436,7 +436,7 @@ export default function DashboardPage() {
 
       {/* Financial KPI cards */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Financial Overview</h2>
+        <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Financial Overview</h2>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <KpiCard
             label="Total Revenue"
@@ -474,7 +474,7 @@ export default function DashboardPage() {
             <div className="flex flex-wrap gap-4 text-sm items-center">
               <div>
                 <p className="text-xs text-gray-400">Revenue</p>
-                <p className="font-semibold text-gray-800">{fmt(s?.totalRevenue ?? 0)}</p>
+                <p className="font-semibold text-gray-100">{fmt(s?.totalRevenue ?? 0)}</p>
               </div>
               <span className="text-gray-300 text-lg">−</span>
               <div>
@@ -484,7 +484,7 @@ export default function DashboardPage() {
               <span className="text-gray-300 text-lg">=</span>
               <div>
                 <p className="text-xs text-gray-400">Gross Profit</p>
-                <p className={`font-semibold ${(s?.grossProfit ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                <p className={`font-semibold ${(s?.grossProfit ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {fmt(s?.grossProfit ?? 0)}
                 </p>
               </div>
@@ -496,7 +496,7 @@ export default function DashboardPage() {
               <span className="text-gray-300 text-lg">=</span>
               <div>
                 <p className="text-xs text-gray-400">Net Profit</p>
-                <p className={`font-semibold ${(s?.netProfit ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                <p className={`font-semibold ${(s?.netProfit ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {fmt(s?.netProfit ?? 0)}
                 </p>
               </div>
@@ -508,22 +508,22 @@ export default function DashboardPage() {
       {/* Charts row */}
       <div className="grid gap-5 lg:grid-cols-5">
         <div className="card p-5 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-gray-800">Campaign Status Distribution</h3>
-          <p className="mt-0.5 mb-3 text-xs text-gray-400">Breakdown across all campaigns</p>
+          <h3 className="text-sm font-semibold text-gray-100">Campaign Status Distribution</h3>
+          <p className="mt-0.5 mb-3 text-xs text-gray-500">Breakdown across all campaigns</p>
           <CampaignStatusPie data={s?.campaignsByStatus ?? {}} />
         </div>
 
         <div className="card p-5 lg:col-span-3">
-          <h3 className="text-sm font-semibold text-gray-800">KOL Pipeline Overview</h3>
-          <p className="mt-0.5 mb-3 text-xs text-gray-400">Active KOLs across all campaigns by pipeline stage</p>
+          <h3 className="text-sm font-semibold text-gray-100">KOL Pipeline Overview</h3>
+          <p className="mt-0.5 mb-3 text-xs text-gray-500">Active KOLs across all campaigns by pipeline stage</p>
           <PipelineBar data={s?.pipelineByStatus ?? {}} />
         </div>
       </div>
 
       {/* Monthly trend */}
       <div className="card p-5">
-        <h3 className="text-sm font-semibold text-gray-800">Monthly Revenue vs Cost Trend</h3>
-        <p className="mt-0.5 mb-3 text-xs text-gray-400">
+        <h3 className="text-sm font-semibold text-gray-100">Monthly Revenue vs Cost Trend</h3>
+        <p className="mt-0.5 mb-3 text-xs text-gray-500">
           Last 6 months — purple area = Revenue, red bars = KOL Cost, green line = Net Profit
         </p>
         <MonthlyTrendChart data={s?.monthlyTrend ?? []} />

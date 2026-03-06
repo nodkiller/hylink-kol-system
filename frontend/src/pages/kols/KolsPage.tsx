@@ -89,7 +89,7 @@ export default function KolsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">KOL Database</h1>
+          <h1 className="text-2xl font-bold text-white">KOL Database</h1>
           <p className="mt-0.5 text-sm text-gray-500">
             {meta.total > 0 ? `${meta.total} KOL${meta.total !== 1 ? 's' : ''} in total` : 'Manage and filter your KOL network'}
           </p>
