@@ -344,36 +344,36 @@ function PostCard({
 
 interface Props {
   campaignId: string;
-  kolId: string;
+  campaignKolId: string;
 }
 
-export default function PostResultsSection({ campaignId, kolId }: Props) {
+export default function PostResultsSection({ campaignId, campaignKolId }: Props) {
   const qc = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPost, setEditingPost] = useState<CampaignKolPost | null>(null);
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ['kol-posts', campaignId, kolId],
-    queryFn: () => campaignsApi.getPosts(campaignId, kolId),
-    enabled: Boolean(campaignId && kolId),
+    queryKey: ['kol-posts', campaignKolId],
+    queryFn: () => campaignsApi.getPosts(campaignId, campaignKolId),
+    enabled: Boolean(campaignKolId),
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['kol-posts', campaignId, kolId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['kol-posts', campaignKolId] });
 
   const createMutation = useMutation({
     mutationFn: (payload: Parameters<typeof campaignsApi.createPost>[2]) =>
-      campaignsApi.createPost(campaignId, kolId, payload),
+      campaignsApi.createPost(campaignId, campaignKolId, payload),
     onSuccess: () => { invalidate(); setShowAddForm(false); },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ postId, payload }: { postId: string; payload: Parameters<typeof campaignsApi.updatePost>[3] }) =>
-      campaignsApi.updatePost(campaignId, kolId, postId, payload),
+      campaignsApi.updatePost(campaignId, campaignKolId, postId, payload),
     onSuccess: () => { invalidate(); setEditingPost(null); },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (postId: string) => campaignsApi.deletePost(campaignId, kolId, postId),
+    mutationFn: (postId: string) => campaignsApi.deletePost(campaignId, campaignKolId, postId),
     onSuccess: invalidate,
   });
 

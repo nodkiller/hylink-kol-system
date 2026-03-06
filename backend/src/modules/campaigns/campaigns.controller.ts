@@ -33,10 +33,6 @@ export class CampaignsController {
 
   // ─── Campaign CRUD ──────────────────────────────────────────────────────────
 
-  /**
-   * POST /campaigns
-   * Create a new Campaign. Allowed roles: Admin, AccountManager.
-   */
   @Post()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER)
@@ -45,34 +41,16 @@ export class CampaignsController {
     return this.campaignsService.create(dto, user.id);
   }
 
-  /**
-   * GET /campaigns
-   * List all campaigns with optional filters and pagination.
-   * All authenticated users can access.
-   *
-   * Example queries:
-   *   GET /campaigns?status=Planning&clientName=Toyota
-   *   GET /campaigns?name=Q1&sortBy=start_date&order=ASC&page=1&limit=10
-   */
   @Get()
   findAll(@Query() query: CampaignQueryDto) {
     return this.campaignsService.findAll(query);
   }
 
-  /**
-   * GET /campaigns/:id
-   * Get a single campaign with KOL status summary.
-   * All authenticated users can access.
-   */
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.campaignsService.findOne(id);
   }
 
-  /**
-   * PATCH /campaigns/:id
-   * Update campaign basic info. Allowed roles: Admin, AccountManager.
-   */
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER)
@@ -85,19 +63,6 @@ export class CampaignsController {
 
   // ─── Campaign-KOL Workflow ──────────────────────────────────────────────────
 
-  /**
-   * POST /campaigns/:id/kols
-   * Add KOLs to a campaign (batch, initial status = Shortlisted).
-   * Blacklisted and non-existent KOLs are reported but don't fail the request.
-   *
-   * Body: { "kolIds": ["uuid1", "uuid2"] }
-   *
-   * Response includes:
-   *   - added:           newly added campaign-KOL records
-   *   - alreadyInCampaign: kolIds that were already present (skipped)
-   *   - notFound:        kolIds that don't exist in the KOL database
-   *   - blacklisted:     KOLs that are blacklisted (blocked from campaigns)
-   */
   @Post(':id/kols')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
@@ -109,17 +74,6 @@ export class CampaignsController {
     return this.campaignsService.addKols(campaignId, dto);
   }
 
-  /**
-   * GET /campaigns/:id/kols
-   * Get all KOLs in a campaign with their pipeline status and data.
-   * Optionally filter by status.
-   * All authenticated users can access.
-   *
-   * Example:
-   *   GET /campaigns/:id/kols
-   *   GET /campaigns/:id/kols?status=Shortlisted
-   *   GET /campaigns/:id/kols?status=Negotiating
-   */
   @Get(':id/kols')
   getCampaignKols(
     @Param('id', ParseUUIDPipe) campaignId: string,
@@ -128,11 +82,6 @@ export class CampaignsController {
     return this.campaignsService.getCampaignKols(campaignId, status);
   }
 
-  /**
-   * PATCH /campaigns/:id/portal
-   * Set or clear the client portal password. Admin / AccountManager only.
-   * Body: { "password": "my-secret" } or { "password": null } to disable portal.
-   */
   @Patch(':id/portal')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER)
@@ -143,19 +92,6 @@ export class CampaignsController {
     return this.campaignsService.updatePortalPassword(id, password);
   }
 
-  /**
-   * PATCH /campaigns/:campaignId/kols/:kolId
-   * Core workflow endpoint — update a KOL's status and data within a campaign.
-   *
-   * Use this to:
-   *   - Advance status:   { "status": "Submitted_to_Client" }
-   *   - Record fee:       { "status": "Contracted", "negotiatedFee": 2500 }
-   *   - Log deliverables: { "deliverables": { "instagram_posts": 2, "deadline": "2025-04-01" } }
-   *   - Mark published:   { "status": "Published", "publishedUrls": ["https://..."] }
-   *   - Add metrics:      { "status": "Completed", "performanceData": { "total_reach": 85000 } }
-   *   - Assign to team:   { "assignedToId": "user-uuid" }
-   *   - Add notes:        { "notes": "Agent replied, expecting quote by Friday" }
-   */
   @Patch(':campaignId/kols/:kolId')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
@@ -169,51 +105,39 @@ export class CampaignsController {
 
   // ─── Post Results ───────────────────────────────────────────────────────────
 
-  /** GET /campaigns/:campaignId/kols/:kolId/posts */
-  @Get(':campaignId/kols/:kolId/posts')
+  @Get(':campaignId/kols/:campaignKolId/posts')
   getPostsForKol(
-    @Param('campaignId', ParseUUIDPipe) campaignId: string,
-    @Param('kolId', ParseUUIDPipe) kolId: string,
+    @Param('campaignKolId', ParseUUIDPipe) campaignKolId: string,
   ) {
-    return this.campaignsService.getPostsForKol(campaignId, kolId);
+    return this.campaignsService.getPostsForKol(campaignKolId);
   }
 
-  /** POST /campaigns/:campaignId/kols/:kolId/posts */
-  @Post(':campaignId/kols/:kolId/posts')
+  @Post(':campaignId/kols/:campaignKolId/posts')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
   @HttpCode(HttpStatus.CREATED)
-  addPost(
-    @Param('campaignId', ParseUUIDPipe) campaignId: string,
-    @Param('kolId', ParseUUIDPipe) kolId: string,
+  createPost(
+    @Param('campaignKolId', ParseUUIDPipe) campaignKolId: string,
     @Body() dto: CreateCampaignKolPostDto,
   ) {
-    return this.campaignsService.addPost(campaignId, kolId, dto);
+    return this.campaignsService.createPost(campaignKolId, dto);
   }
 
-  /** PATCH /campaigns/:campaignId/kols/:kolId/posts/:postId */
-  @Patch(':campaignId/kols/:kolId/posts/:postId')
+  @Patch(':campaignId/kols/:campaignKolId/posts/:postId')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
   updatePost(
-    @Param('campaignId', ParseUUIDPipe) campaignId: string,
-    @Param('kolId', ParseUUIDPipe) kolId: string,
     @Param('postId', ParseUUIDPipe) postId: string,
     @Body() dto: UpdateCampaignKolPostDto,
   ) {
-    return this.campaignsService.updatePost(campaignId, kolId, postId, dto);
+    return this.campaignsService.updatePost(postId, dto);
   }
 
-  /** DELETE /campaigns/:campaignId/kols/:kolId/posts/:postId */
-  @Delete(':campaignId/kols/:kolId/posts/:postId')
+  @Delete(':campaignId/kols/:campaignKolId/posts/:postId')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ACCOUNT_MANAGER, UserRole.KOL_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
-  deletePost(
-    @Param('campaignId', ParseUUIDPipe) campaignId: string,
-    @Param('kolId', ParseUUIDPipe) kolId: string,
-    @Param('postId', ParseUUIDPipe) postId: string,
-  ) {
-    return this.campaignsService.deletePost(campaignId, kolId, postId);
+  deletePost(@Param('postId', ParseUUIDPipe) postId: string) {
+    return this.campaignsService.deletePost(postId);
   }
 }

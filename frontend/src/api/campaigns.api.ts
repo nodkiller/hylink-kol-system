@@ -110,15 +110,15 @@ export const campaignsApi = {
 
   // ── Post Results ────────────────────────────────────────────────────────────
 
-  getPosts: (campaignId: string, kolId: string) =>
-    apiClient.get<CampaignKolPost[]>(`/campaigns/${campaignId}/kols/${kolId}/posts`).then(r => r.data),
+  getPosts: (campaignId: string, campaignKolId: string) =>
+    apiClient.get<CampaignKolPost[]>(`/campaigns/${campaignId}/kols/${campaignKolId}/posts`).then(r => r.data),
 
-  createPost: (campaignId: string, kolId: string, payload: PostPayload) =>
-    apiClient.post<CampaignKolPost>(`/campaigns/${campaignId}/kols/${kolId}/posts`, payload).then(r => r.data),
+  createPost: (campaignId: string, campaignKolId: string, payload: PostPayload) =>
+    apiClient.post<CampaignKolPost>(`/campaigns/${campaignId}/kols/${campaignKolId}/posts`, payload).then(r => r.data),
 
-  updatePost: (campaignId: string, kolId: string, postId: string, payload: Partial<PostPayload>) =>
-    apiClient.patch<CampaignKolPost>(`/campaigns/${campaignId}/kols/${kolId}/posts/${postId}`, payload).then(r => r.data),
+  updatePost: (campaignId: string, campaignKolId: string, postId: string, payload: Partial<PostPayload>) =>
+    apiClient.patch<CampaignKolPost>(`/campaigns/${campaignId}/kols/${campaignKolId}/posts/${postId}`, payload).then(r => r.data),
 
-  deletePost: (campaignId: string, kolId: string, postId: string) =>
-    apiClient.delete(`/campaigns/${campaignId}/kols/${kolId}/posts/${postId}`),
+  deletePost: (campaignId: string, campaignKolId: string, postId: string) =>
+    apiClient.delete(`/campaigns/${campaignId}/kols/${campaignKolId}/posts/${postId}`),
 };

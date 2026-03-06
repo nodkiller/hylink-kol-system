@@ -339,8 +339,7 @@ export default function KolDetailDrawer({ record, campaignId, onClose }: Props) 
             {record && (
               <PostResultsSection
                 campaignId={campaignId}
-                kolId={record.kolId}
-                kolPlatforms={record.kol?.platforms}
+                campaignKolId={record.id}
               />
             )}
           </div>

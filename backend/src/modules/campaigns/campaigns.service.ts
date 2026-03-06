@@ -333,41 +333,20 @@ export class CampaignsService {
 
   // ─── Campaign KOL Posts ─────────────────────────────────────────────────────
 
-  /** Verify a campaign-KOL record exists — throws 404 otherwise. */
-  private async assertCampaignKolExists(campaignId: string, kolId: string) {
-    const record = await this.campaignKolRepo.findOne({ where: { campaignId, kolId } });
-    if (!record) {
-      throw new NotFoundException(`KOL "${kolId}" is not associated with campaign "${campaignId}"`);
-    }
-    return record;
-  }
-
-  async getPostsForKol(campaignId: string, kolId: string): Promise<CampaignKolPost[]> {
-    const ck = await this.assertCampaignKolExists(campaignId, kolId);
+  async getPostsForKol(campaignKolId: string): Promise<CampaignKolPost[]> {
     return this.postRepo.find({
-      where: { campaignKolId: ck.id },
+      where: { campaignKolId },
       order: { publishedAt: 'DESC', createdAt: 'DESC' },
     });
   }
 
-  async addPost(
-    campaignId: string,
-    kolId: string,
-    dto: CreateCampaignKolPostDto,
-  ): Promise<CampaignKolPost> {
-    const ck = await this.assertCampaignKolExists(campaignId, kolId);
-    const post = this.postRepo.create({ ...dto, campaignKolId: ck.id });
+  async createPost(campaignKolId: string, dto: CreateCampaignKolPostDto): Promise<CampaignKolPost> {
+    const post = this.postRepo.create({ ...dto, campaignKolId });
     return this.postRepo.save(post);
   }
 
-  async updatePost(
-    campaignId: string,
-    kolId: string,
-    postId: string,
-    dto: UpdateCampaignKolPostDto,
-  ): Promise<CampaignKolPost> {
-    const ck = await this.assertCampaignKolExists(campaignId, kolId);
-    const post = await this.postRepo.findOne({ where: { id: postId, campaignKolId: ck.id } });
+  async updatePost(postId: string, dto: UpdateCampaignKolPostDto): Promise<CampaignKolPost> {
+    const post = await this.postRepo.findOne({ where: { id: postId } });
     if (!post) throw new NotFoundException(`Post "${postId}" not found`);
 
     const updateData = Object.fromEntries(
@@ -377,9 +356,8 @@ export class CampaignsService {
     return (await this.postRepo.findOne({ where: { id: postId } }))!;
   }
 
-  async deletePost(campaignId: string, kolId: string, postId: string): Promise<void> {
-    const ck = await this.assertCampaignKolExists(campaignId, kolId);
-    const post = await this.postRepo.findOne({ where: { id: postId, campaignKolId: ck.id } });
+  async deletePost(postId: string): Promise<void> {
+    const post = await this.postRepo.findOne({ where: { id: postId } });
     if (!post) throw new NotFoundException(`Post "${postId}" not found`);
     await this.postRepo.delete(postId);
   }
