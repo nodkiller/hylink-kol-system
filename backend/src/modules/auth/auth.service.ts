@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -70,6 +71,27 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  /**
+   * One-time seed: creates the first Admin account.
+   * Throws 409 if any user already exists in the database.
+   */
+  async seedAdmin(dto: RegisterDto): Promise<Omit<User, 'passwordHash'>> {
+    const existingCount = await this.usersService.count();
+    if (existingCount > 0) {
+      throw new ConflictException(
+        'Seed endpoint disabled — users already exist. Use the admin panel to add more accounts.',
+      );
+    }
+    const user = await this.usersService.create({
+      fullName: dto.fullName,
+      email: dto.email,
+      password: dto.password,
+      role: UserRole.ADMIN,
+    });
+    const { passwordHash: _, ...safeUser } = user as any;
+    return safeUser;
   }
 
   /** Create a new user account (Admin only). */

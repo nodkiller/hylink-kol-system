@@ -59,6 +59,11 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
+  /** Count total users. */
+  async count(): Promise<number> {
+    return this.userRepo.count();
+  }
+
   /** List all users (Admin use). */
   async findAll(): Promise<User[]> {
     return this.userRepo.find({ order: { createdAt: 'DESC' } });

@@ -33,6 +33,18 @@ export class AuthController {
   }
 
   /**
+   * POST /auth/seed
+   * Public, one-time use. Creates the first Admin account.
+   * Returns 409 if any user already exists.
+   */
+  @Public()
+  @Post('seed')
+  @HttpCode(HttpStatus.CREATED)
+  seed(@Body() dto: RegisterDto) {
+    return this.authService.seedAdmin(dto);
+  }
+
+  /**
    * POST /auth/register
    * Admin-only. Creates an AccountManager or KOLManager account.
    * JwtAuthGuard is applied globally; RolesGuard checks Admin role.
