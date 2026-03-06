@@ -20,12 +20,9 @@ async function bootstrap() {
     }),
   );
 
-  // ── CORS (allow React dev server in development) ───────────────
+  // ── CORS ───────────────────────────────────────────────────────
   app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL
-        : ['http://localhost:5173', 'http://localhost:3001'],
+    origin: true, // Allow all origins (frontend URL validated via JWT)
     credentials: true,
   });
 
