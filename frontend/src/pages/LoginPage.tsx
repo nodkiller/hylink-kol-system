@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import hylinkLogo from '@/assets/hylink-logo.svg';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,11 +43,12 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 text-white text-xl font-bold">
-            H
-          </div>
-          <h1 className="text-2xl font-bold text-white">Hylink KOL System</h1>
-          <p className="mt-1 text-sm text-gray-400">Internal management portal</p>
+          <img
+            src={hylinkLogo}
+            alt="Hylink"
+            className="mx-auto mb-4 w-48 drop-shadow-lg"
+          />
+          <p className="text-sm text-gray-500 tracking-wide uppercase">Internal Management Portal</p>
         </div>
 
         {/* Form card */}
