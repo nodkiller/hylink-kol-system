@@ -27,25 +27,40 @@ import { ReportingModule } from './modules/reporting/reporting.module';
     }),
 
     // ── Database ────────────────────────────────────────────────
+    // Supports both DATABASE_URL (Railway/Heroku) and individual DB_* vars
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get<string>('DB_USERNAME', 'postgres'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_DATABASE', 'hylink_kol'),
-        entities: [User, Kol, KolPlatform, Campaign, CampaignKol],
-        // true = auto-create/update tables in development
-        // MUST be false in production — use TypeORM migrations
-        synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
-        logging: config.get<boolean>('DB_LOGGING', false),
-        ssl:
-          config.get<string>('NODE_ENV') === 'production'
-            ? { rejectUnauthorized: false }
-            : false,
-      }),
+      useFactory: (config: ConfigService) => {
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        const isProduction = config.get<string>('NODE_ENV') === 'production';
+        const ssl = isProduction ? { rejectUnauthorized: false } : false;
+
+        if (databaseUrl) {
+          // Railway / Heroku provide a single DATABASE_URL connection string
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            entities: [User, Kol, KolPlatform, Campaign, CampaignKol],
+            synchronize: config.get<boolean>('DB_SYNCHRONIZE', true),
+            logging: false,
+            ssl,
+          };
+        }
+
+        // Local development: use individual DB_* variables
+        return {
+          type: 'postgres',
+          host: config.get<string>('DB_HOST', 'localhost'),
+          port: config.get<number>('DB_PORT', 5432),
+          username: config.get<string>('DB_USERNAME', 'postgres'),
+          password: config.get<string>('DB_PASSWORD'),
+          database: config.get<string>('DB_DATABASE', 'hylink_kol'),
+          entities: [User, Kol, KolPlatform, Campaign, CampaignKol],
+          synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
+          logging: config.get<boolean>('DB_LOGGING', false),
+          ssl,
+        };
+      },
     }),
 
     // ── Feature Modules ─────────────────────────────────────────
