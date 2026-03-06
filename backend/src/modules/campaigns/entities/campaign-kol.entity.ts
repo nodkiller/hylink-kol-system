@@ -111,6 +111,6 @@ export class CampaignKol {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @OneToMany(() => CampaignKolPost, (p) => p.campaignKol)
+  @OneToMany(() => CampaignKolPost, (post) => post.campaignKol, { cascade: true })
   posts: CampaignKolPost[];
 }
