@@ -255,7 +255,7 @@ export default function InfluencerSearchPage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={heroMode ? 'Try "beauty", "travel", or a @username…' : 'Search again…'}
+              placeholder={heroMode ? 'Enter an @username to search…' : 'Search another @username…'}
               className="h-[46px] w-full rounded-full border border-white/[0.1] bg-white/[0.06] pl-11 pr-28 text-[13.5px] text-white placeholder-white/25 transition-all focus:border-white/[0.2] focus:bg-white/[0.08] focus:outline-none"
             />
             <button
