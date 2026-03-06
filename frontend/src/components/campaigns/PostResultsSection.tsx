@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { campaignsApi } from '@/api/campaigns.api';
 import { PostContentType, PostSentiment, type CampaignKolPost } from '@/types';
-import { PlatformName } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -12,17 +11,6 @@ function fmt(n?: number | null) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
   return String(n);
-}
-
-/** EMV auto-calc: (views×$0.003) + (likes×$0.08) + (comments×$0.40) + (shares×$0.20) + (saves×$0.12) */
-function calcEmv(f: Partial<PostFormValues>): number {
-  return (
-    (Number(f.views) || 0) * 0.003 +
-    (Number(f.likes) || 0) * 0.08 +
-    (Number(f.comments) || 0) * 0.40 +
-    (Number(f.shares) || 0) * 0.20 +
-    (Number(f.saves) || 0) * 0.12
-  );
 }
 
 const SENTIMENT_COLORS: Record<PostSentiment, string> = {
@@ -46,68 +34,66 @@ const CONTENT_TYPE_LABELS: Record<PostContentType, string> = {
 
 interface PostFormValues {
   postUrl: string;
-  platform: string;
   contentType: PostContentType;
-  postedAt: string;
+  publishedAt: string;
   views: string;
   likes: string;
   comments: string;
   shares: string;
   saves: string;
-  clicks: string;
-  conversions: string;
+  reach: string;
+  impressions: string;
+  ctr: string;
   attributedSales: string;
-  emv: string;
-  autoEmv: boolean;
   sentiment: PostSentiment | '';
+  revisionRounds: string;
   notes: string;
 }
 
 const EMPTY_FORM: PostFormValues = {
-  postUrl: '', platform: PlatformName.INSTAGRAM, contentType: PostContentType.REEL,
-  postedAt: '', views: '', likes: '', comments: '', shares: '', saves: '',
-  clicks: '', conversions: '', attributedSales: '', emv: '', autoEmv: true,
-  sentiment: '', notes: '',
+  postUrl: '', contentType: PostContentType.REEL, publishedAt: '',
+  views: '', likes: '', comments: '', shares: '', saves: '',
+  reach: '', impressions: '', ctr: '', attributedSales: '',
+  sentiment: '', revisionRounds: '0', notes: '',
 };
 
 function postToForm(p: CampaignKolPost): PostFormValues {
   return {
     postUrl: p.postUrl,
-    platform: p.platform,
     contentType: p.contentType,
-    postedAt: p.postedAt ?? '',
+    publishedAt: p.publishedAt ? p.publishedAt.split('T')[0] : '',
     views: p.views != null ? String(p.views) : '',
     likes: p.likes != null ? String(p.likes) : '',
     comments: p.comments != null ? String(p.comments) : '',
     shares: p.shares != null ? String(p.shares) : '',
     saves: p.saves != null ? String(p.saves) : '',
-    clicks: p.clicks != null ? String(p.clicks) : '',
-    conversions: p.conversions != null ? String(p.conversions) : '',
+    reach: p.reach != null ? String(p.reach) : '',
+    impressions: p.impressions != null ? String(p.impressions) : '',
+    ctr: p.ctr != null ? String(Number(p.ctr) * 100) : '',
     attributedSales: p.attributedSales != null ? String(p.attributedSales) : '',
-    emv: p.emv != null ? String(Number(p.emv).toFixed(2)) : '',
-    autoEmv: false,
     sentiment: (p.sentiment as PostSentiment) ?? '',
+    revisionRounds: String(p.revisionRounds ?? 0),
     notes: p.notes ?? '',
   };
 }
 
 function formToPayload(f: PostFormValues) {
-  const emvValue = f.autoEmv ? calcEmv(f) : (f.emv ? Number(f.emv) : undefined);
   return {
     postUrl: f.postUrl,
-    platform: f.platform,
     contentType: f.contentType,
-    postedAt: f.postedAt || undefined,
+    publishedAt: f.publishedAt || undefined,
     views: f.views ? Number(f.views) : undefined,
     likes: f.likes ? Number(f.likes) : undefined,
     comments: f.comments ? Number(f.comments) : undefined,
     shares: f.shares ? Number(f.shares) : undefined,
     saves: f.saves ? Number(f.saves) : undefined,
-    clicks: f.clicks ? Number(f.clicks) : undefined,
-    conversions: f.conversions ? Number(f.conversions) : undefined,
+    reach: f.reach ? Number(f.reach) : undefined,
+    impressions: f.impressions ? Number(f.impressions) : undefined,
+    // UI shows CTR as %, stored as 0–1 decimal
+    ctr: f.ctr ? Number(f.ctr) / 100 : undefined,
     attributedSales: f.attributedSales ? Number(f.attributedSales) : undefined,
-    emv: emvValue && emvValue > 0 ? emvValue : undefined,
     sentiment: f.sentiment || undefined,
+    revisionRounds: f.revisionRounds !== '' ? Number(f.revisionRounds) : undefined,
     notes: f.notes || undefined,
   };
 }
@@ -126,11 +112,8 @@ function PostForm({
   isSaving: boolean;
 }) {
   const [f, setF] = useState<PostFormValues>(initial);
-  const set = (k: keyof PostFormValues, v: string | boolean) =>
+  const set = (k: keyof PostFormValues, v: string) =>
     setF((prev) => ({ ...prev, [k]: v }));
-
-  const autoEmvValue = calcEmv(f);
-  const displayEmv = f.autoEmv ? autoEmvValue.toFixed(2) : f.emv;
 
   const numInput = (label: string, key: keyof PostFormValues, placeholder = '0') => (
     <div>
@@ -146,7 +129,7 @@ function PostForm({
 
   return (
     <div className="rounded-xl border border-primary-700/30 bg-gray-800/60 p-4 space-y-4">
-      {/* URL + Platform + Content Type */}
+      {/* URL */}
       <div>
         <label className="label">Post URL *</label>
         <input
@@ -157,41 +140,58 @@ function PostForm({
         />
       </div>
 
+      {/* Content Type + Published Date */}
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="label">Platform</label>
-          <select value={f.platform} onChange={(e) => set('platform', e.target.value)} className="input mt-1 text-sm">
-            {Object.values(PlatformName).map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
         <div>
           <label className="label">Content Type</label>
           <select value={f.contentType} onChange={(e) => set('contentType', e.target.value as PostContentType)} className="input mt-1 text-sm">
             {Object.entries(CONTENT_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </div>
-      </div>
-
-      <div>
-        <label className="label">Posted Date</label>
-        <input
-          type="date" value={f.postedAt}
-          onChange={(e) => set('postedAt', e.target.value)}
-          className="input mt-1 text-sm"
-        />
+        <div>
+          <label className="label">Published Date</label>
+          <input
+            type="date" value={f.publishedAt}
+            onChange={(e) => set('publishedAt', e.target.value)}
+            className="input mt-1 text-sm"
+          />
+        </div>
       </div>
 
       {/* Engagement metrics */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Engagement Metrics</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Engagement</p>
         <div className="grid grid-cols-3 gap-2">
           {numInput('Views', 'views')}
           {numInput('Likes', 'likes')}
           {numInput('Comments', 'comments')}
           {numInput('Shares', 'shares')}
           {numInput('Saves', 'saves')}
-          {numInput('Clicks', 'clicks')}
-          {numInput('Conversions', 'conversions')}
+        </div>
+      </div>
+
+      {/* Reach / Impressions / CTR */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Reach & Distribution</p>
+        <div className="grid grid-cols-3 gap-2">
+          {numInput('Reach', 'reach')}
+          {numInput('Impressions', 'impressions')}
+          <div>
+            <label className="label">CTR (%)</label>
+            <input
+              type="number" min={0} max={100} step="0.01" placeholder="0.00"
+              value={f.ctr}
+              onChange={(e) => set('ctr', e.target.value)}
+              className="input mt-1 text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Business outcomes */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Business Outcomes</p>
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="label">Sales (AUD)</label>
             <input
@@ -201,34 +201,16 @@ function PostForm({
               className="input mt-1 text-sm"
             />
           </div>
-        </div>
-      </div>
-
-      {/* EMV */}
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <label className="label">EMV (AUD)</label>
-          <label className="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer">
+          <div>
+            <label className="label">Revision Rounds</label>
             <input
-              type="checkbox" checked={f.autoEmv}
-              onChange={(e) => set('autoEmv', e.target.checked)}
-              className="rounded border-gray-600"
+              type="number" min={0} placeholder="0"
+              value={f.revisionRounds}
+              onChange={(e) => set('revisionRounds', e.target.value)}
+              className="input mt-1 text-sm"
             />
-            Auto-calculate
-          </label>
-        </div>
-        {f.autoEmv ? (
-          <div className="input mt-1 text-sm text-gray-400 select-none bg-gray-900">
-            ${autoEmvValue.toFixed(2)} <span className="text-xs text-gray-600">(views×$0.003 + likes×$0.08 + comments×$0.40 + shares×$0.20 + saves×$0.12)</span>
           </div>
-        ) : (
-          <input
-            type="number" min={0} step="0.01" placeholder="0.00"
-            value={f.emv}
-            onChange={(e) => set('emv', e.target.value)}
-            className="input mt-1 text-sm"
-          />
-        )}
+        </div>
       </div>
 
       {/* Sentiment */}
@@ -288,15 +270,15 @@ function PostCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-medium text-gray-300 bg-gray-700 rounded-full px-2 py-0.5">
-              {post.platform}
-            </span>
-            <span className="text-xs text-gray-500">
               {CONTENT_TYPE_LABELS[post.contentType] ?? post.contentType}
             </span>
-            {post.postedAt && (
+            {post.publishedAt && (
               <span className="text-xs text-gray-500">
-                {new Date(post.postedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {new Date(post.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
+            )}
+            {post.revisionRounds > 0 && (
+              <span className="text-xs text-amber-400">{post.revisionRounds} rev</span>
             )}
           </div>
           <a
@@ -336,14 +318,17 @@ function PostCard({
         {totalEngagement > 0 && (
           <span className="text-gray-400"><span className="font-semibold text-gray-200">{fmt(totalEngagement)}</span> eng</span>
         )}
-        {post.conversions != null && (
-          <span className="text-gray-400"><span className="font-semibold text-gray-200">{post.conversions}</span> cvr</span>
+        {post.reach != null && (
+          <span className="text-gray-400"><span className="font-semibold text-gray-200">{fmt(post.reach)}</span> reach</span>
+        )}
+        {post.impressions != null && (
+          <span className="text-gray-400"><span className="font-semibold text-gray-200">{fmt(post.impressions)}</span> imp</span>
+        )}
+        {post.ctr != null && (
+          <span className="text-gray-400"><span className="font-semibold text-gray-200">{(Number(post.ctr) * 100).toFixed(2)}%</span> CTR</span>
         )}
         {post.attributedSales != null && (
           <span className="text-green-400 font-semibold">${Number(post.attributedSales).toLocaleString()} sales</span>
-        )}
-        {post.emv != null && (
-          <span className="text-purple-400 font-semibold">EMV ${Number(post.emv).toLocaleString()}</span>
         )}
         {post.sentiment && (
           <span className={clsx('font-medium', SENTIMENT_COLORS[post.sentiment as PostSentiment])}>
@@ -360,7 +345,6 @@ function PostCard({
 interface Props {
   campaignId: string;
   kolId: string;
-  kolPlatforms?: { platformName: string }[];
 }
 
 export default function PostResultsSection({ campaignId, kolId }: Props) {

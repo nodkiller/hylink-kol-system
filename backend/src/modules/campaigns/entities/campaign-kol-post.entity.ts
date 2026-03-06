@@ -7,31 +7,19 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { PlatformName, PostContentType, PostSentiment } from '../../../common/enums';
+import { PostContentType, PostSentiment } from '../../../common/enums';
 import { CampaignKol } from './campaign-kol.entity';
 
-/**
- * Tracks per-post performance data for a KOL in a campaign.
- * This is the core "process data" layer — each published content piece gets
- * its own row so we can analyse content-type × platform × KOL effectiveness.
- */
 @Entity('campaign_kol_posts')
 export class CampaignKolPost {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // FK to campaign_kols (composite key: campaignId + kolId)
-  @Column({ name: 'campaign_id' })
-  campaignId: string;
-
-  @Column({ name: 'kol_id' })
-  kolId: string;
+  @Column({ name: 'campaign_kol_id' })
+  campaignKolId: string;
 
   @ManyToOne(() => CampaignKol, { onDelete: 'CASCADE' })
-  @JoinColumn([
-    { name: 'campaign_id', referencedColumnName: 'campaignId' },
-    { name: 'kol_id', referencedColumnName: 'kolId' },
-  ])
+  @JoinColumn({ name: 'campaign_kol_id' })
   campaignKol: CampaignKol;
 
   // ── Content identification ──────────────────────────────────────────────────
@@ -39,14 +27,11 @@ export class CampaignKolPost {
   @Column({ name: 'post_url', type: 'text' })
   postUrl: string;
 
-  @Column({ name: 'platform', type: 'enum', enum: PlatformName })
-  platform: PlatformName;
-
   @Column({ name: 'content_type', type: 'enum', enum: PostContentType })
   contentType: PostContentType;
 
-  @Column({ name: 'posted_at', type: 'date', nullable: true })
-  postedAt: string | null;
+  @Column({ name: 'published_at', type: 'timestamptz', default: () => 'NOW()' })
+  publishedAt: Date;
 
   // ── Engagement metrics ──────────────────────────────────────────────────────
 
@@ -65,11 +50,21 @@ export class CampaignKolPost {
   @Column({ name: 'saves', type: 'integer', nullable: true })
   saves: number | null;
 
-  @Column({ name: 'clicks', type: 'integer', nullable: true })
-  clicks: number | null;
+  @Column({ name: 'reach', type: 'integer', nullable: true })
+  reach: number | null;
 
-  @Column({ name: 'conversions', type: 'integer', nullable: true })
-  conversions: number | null;
+  @Column({ name: 'impressions', type: 'integer', nullable: true })
+  impressions: number | null;
+
+  /** Click-through rate, stored as 0–1 (e.g. 0.0523 = 5.23%) */
+  @Column({
+    name: 'ctr',
+    type: 'decimal',
+    precision: 5,
+    scale: 4,
+    nullable: true,
+  })
+  ctr: number | null;
 
   // ── Business outcome metrics ────────────────────────────────────────────────
 
@@ -77,25 +72,11 @@ export class CampaignKolPost {
   @Column({
     name: 'attributed_sales',
     type: 'decimal',
-    precision: 12,
+    precision: 10,
     scale: 2,
     nullable: true,
   })
   attributedSales: number | null;
-
-  /**
-   * Earned Media Value (AUD) — can be manually set or auto-calculated.
-   * Formula hint: (views × $0.003) + (likes × $0.08) + (comments × $0.40)
-   *             + (shares × $0.20) + (saves × $0.12)
-   */
-  @Column({
-    name: 'emv',
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    nullable: true,
-  })
-  emv: number | null;
 
   // ── Qualitative ─────────────────────────────────────────────────────────────
 
@@ -106,6 +87,10 @@ export class CampaignKolPost {
     nullable: true,
   })
   sentiment: PostSentiment | null;
+
+  /** Number of content revision rounds before final approval */
+  @Column({ name: 'revision_rounds', type: 'integer', default: 0 })
+  revisionRounds: number;
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;

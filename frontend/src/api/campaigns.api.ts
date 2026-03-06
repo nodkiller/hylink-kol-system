@@ -1,6 +1,24 @@
 import apiClient from './client';
 import type { CampaignKolStatus, CampaignKolPost, PostContentType, PostSentiment } from '@/types';
 
+type PostPayload = {
+  postUrl: string;
+  contentType: PostContentType;
+  publishedAt?: string;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  saves?: number;
+  reach?: number;
+  impressions?: number;
+  ctr?: number;
+  attributedSales?: number;
+  sentiment?: PostSentiment;
+  revisionRounds?: number;
+  notes?: string;
+};
+
 export interface Campaign {
   id: string;
   name: string;
@@ -95,42 +113,10 @@ export const campaignsApi = {
   getPosts: (campaignId: string, kolId: string) =>
     apiClient.get<CampaignKolPost[]>(`/campaigns/${campaignId}/kols/${kolId}/posts`).then(r => r.data),
 
-  createPost: (campaignId: string, kolId: string, payload: {
-    postUrl: string;
-    platform: string;
-    contentType: PostContentType;
-    postedAt?: string;
-    views?: number;
-    likes?: number;
-    comments?: number;
-    shares?: number;
-    saves?: number;
-    clicks?: number;
-    conversions?: number;
-    attributedSales?: number;
-    emv?: number;
-    sentiment?: PostSentiment;
-    notes?: string;
-  }) =>
+  createPost: (campaignId: string, kolId: string, payload: PostPayload) =>
     apiClient.post<CampaignKolPost>(`/campaigns/${campaignId}/kols/${kolId}/posts`, payload).then(r => r.data),
 
-  updatePost: (campaignId: string, kolId: string, postId: string, payload: Partial<{
-    postUrl: string;
-    platform: string;
-    contentType: PostContentType;
-    postedAt: string;
-    views: number;
-    likes: number;
-    comments: number;
-    shares: number;
-    saves: number;
-    clicks: number;
-    conversions: number;
-    attributedSales: number;
-    emv: number;
-    sentiment: PostSentiment;
-    notes: string;
-  }>) =>
+  updatePost: (campaignId: string, kolId: string, postId: string, payload: Partial<PostPayload>) =>
     apiClient.patch<CampaignKolPost>(`/campaigns/${campaignId}/kols/${kolId}/posts/${postId}`, payload).then(r => r.data),
 
   deletePost: (campaignId: string, kolId: string, postId: string) =>

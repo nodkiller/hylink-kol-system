@@ -7,23 +7,21 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Max,
   Min,
 } from 'class-validator';
-import { PlatformName, PostContentType, PostSentiment } from '../../../common/enums';
+import { PostContentType, PostSentiment } from '../../../common/enums';
 
 export class CreateCampaignKolPostDto {
   @IsUrl({}, { message: 'postUrl must be a valid URL' })
   postUrl: string;
-
-  @IsEnum(PlatformName)
-  platform: PlatformName;
 
   @IsEnum(PostContentType)
   contentType: PostContentType;
 
   @IsOptional()
   @IsDateString()
-  postedAt?: string;
+  publishedAt?: string;
 
   @IsOptional()
   @Type(() => Number)
@@ -59,13 +57,21 @@ export class CreateCampaignKolPostDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  clicks?: number;
+  reach?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  conversions?: number;
+  impressions?: number;
+
+  /** Click-through rate as a decimal between 0 and 1 */
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @Min(0)
+  @Max(1)
+  ctr?: number;
 
   @IsOptional()
   @Type(() => Number)
@@ -74,14 +80,14 @@ export class CreateCampaignKolPostDto {
   attributedSales?: number;
 
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  emv?: number;
-
-  @IsOptional()
   @IsEnum(PostSentiment)
   sentiment?: PostSentiment;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  revisionRounds?: number;
 
   @IsOptional()
   @IsString()

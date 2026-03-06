@@ -62,22 +62,22 @@ export enum PostSentiment {
 
 export interface CampaignKolPost {
   id: string;
-  campaignId: string;
-  kolId: string;
+  campaignKolId: string;
   postUrl: string;
-  platform: string;
   contentType: PostContentType;
-  postedAt?: string;
+  publishedAt: string;
   views?: number;
   likes?: number;
   comments?: number;
   shares?: number;
   saves?: number;
-  clicks?: number;
-  conversions?: number;
+  reach?: number;
+  impressions?: number;
+  /** Click-through rate as 0–1 decimal (e.g. 0.0523 = 5.23%) */
+  ctr?: number;
   attributedSales?: number;
-  emv?: number;
   sentiment?: PostSentiment;
+  revisionRounds: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
