@@ -17,6 +17,7 @@ import { Campaign } from './modules/campaigns/entities/campaign.entity';
 import { CampaignKol } from './modules/campaigns/entities/campaign-kol.entity';
 import { PortalModule } from './modules/portal/portal.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
+import { InfluencerSearchModule } from './modules/influencer-search/influencer-search.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ReportingModule } from './modules/reporting/reporting.module';
     CampaignsModule,
     PortalModule,
     ReportingModule,
+    InfluencerSearchModule,
   ],
 
   providers: [

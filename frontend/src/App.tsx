@@ -7,6 +7,7 @@ import KolsPage from '@/pages/kols/KolsPage';
 import CampaignsPage from '@/pages/campaigns/CampaignsPage';
 import CampaignDetailPage from '@/pages/campaigns/CampaignDetailPage';
 import PortalPage from '@/pages/portal/PortalPage';
+import InfluencerSearchPage from '@/pages/influencer-search/InfluencerSearchPage';
 import type { ReactNode } from 'react';
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="kols" element={<KolsPage />} />
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+          <Route path="influencer-search" element={<InfluencerSearchPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
