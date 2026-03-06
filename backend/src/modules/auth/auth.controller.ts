@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { SeedDto } from './dto/seed.dto';
 import { Public } from './decorators/public.decorator';
 import { Roles } from './decorators/roles.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -40,7 +41,7 @@ export class AuthController {
   @Public()
   @Post('seed')
   @HttpCode(HttpStatus.CREATED)
-  seed(@Body() dto: RegisterDto) {
+  seed(@Body() dto: SeedDto) {
     return this.authService.seedAdmin(dto);
   }
 

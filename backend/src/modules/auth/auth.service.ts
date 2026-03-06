@@ -9,6 +9,7 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { SeedDto } from './dto/seed.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { UserRole } from '../../common/enums';
 
@@ -77,7 +78,7 @@ export class AuthService {
    * One-time seed: creates the first Admin account.
    * Throws 409 if any user already exists in the database.
    */
-  async seedAdmin(dto: RegisterDto): Promise<Omit<User, 'passwordHash'>> {
+  async seedAdmin(dto: SeedDto): Promise<Omit<User, 'passwordHash'>> {
     const existingCount = await this.usersService.count();
     if (existingCount > 0) {
       throw new ConflictException(
