@@ -9,9 +9,9 @@ const ROLE_LABEL: Record<UserRole, string> = {
 };
 
 const ROLE_COLOR: Record<UserRole, string> = {
-  [UserRole.ADMIN]: 'bg-red-900/50 text-red-300 ring-red-700/40',
-  [UserRole.ACCOUNT_MANAGER]: 'bg-blue-900/50 text-blue-300 ring-blue-700/40',
-  [UserRole.KOL_MANAGER]: 'bg-green-900/50 text-green-300 ring-green-700/40',
+  [UserRole.ADMIN]: 'bg-red-50 text-primary-600 ring-primary-100',
+  [UserRole.ACCOUNT_MANAGER]: 'bg-blue-50 text-blue-600 ring-blue-100',
+  [UserRole.KOL_MANAGER]: 'bg-green-50 text-green-600 ring-green-100',
 };
 
 export default function Topbar() {
@@ -25,8 +25,8 @@ export default function Topbar() {
   };
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-800 bg-gray-900 px-6">
-      {/* Left — breadcrumb placeholder for future use */}
+    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
+      {/* Left — placeholder */}
       <div />
 
       {/* Right — user info + logout */}
@@ -34,11 +34,11 @@ export default function Topbar() {
         {user && (
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600/20 text-primary-400 text-sm font-semibold border border-primary-700/40">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50 text-primary-600 text-sm font-semibold border border-primary-100">
               {user.fullName.charAt(0).toUpperCase()}
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-medium text-gray-100 leading-tight">{user.fullName}</p>
+              <p className="text-sm font-medium text-gray-800 leading-tight">{user.fullName}</p>
               <span
                 className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_COLOR[user.role]}`}
               >
@@ -51,7 +51,7 @@ export default function Topbar() {
         <button
           onClick={handleLogout}
           title="Sign out"
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-800 hover:text-gray-200 transition-colors"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

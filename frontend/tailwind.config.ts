@@ -5,20 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand accent
+        // Chery red — primary brand accent
         primary: {
-          50:  '#eef2ff',
-          100: '#e0e7ff',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          900: '#312e81',
-        },
-        // Dark background scale
-        gray: {
-          950: '#0a0b0f',
+          50:  '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#EB5757',
+          600: '#d94444',
+          700: '#c03030',
+          800: '#9b2727',
+          900: '#7f1d1d',
         },
       },
       fontFamily: {

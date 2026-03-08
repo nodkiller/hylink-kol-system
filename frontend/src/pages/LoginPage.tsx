@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import hylinkLogo from '@/assets/hylink-logo.svg';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,42 +38,67 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="mb-8 text-center">
+    <div className="flex min-h-screen bg-[#F9F9F9]">
+      {/* Left panel — branding */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-white border-r border-gray-100 px-16">
+        <img
+          src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+          alt="Chery Australia"
+          className="w-52 mb-10 object-contain"
+          crossOrigin="anonymous"
+        />
+        <h1 className="text-2xl font-semibold text-gray-900 text-center leading-snug">
+          KOL Management Platform
+        </h1>
+        <p className="mt-3 text-sm text-gray-400 text-center max-w-xs leading-relaxed">
+          Purpose-built for Chery Australia — manage influencer campaigns, track performance, and grow your brand.
+        </p>
+        <div className="mt-12 flex items-center gap-3 w-40">
+          <div className="flex-1 h-px bg-gray-100" />
+          <div className="h-1.5 w-1.5 rounded-full bg-primary-400" />
+          <div className="flex-1 h-px bg-gray-100" />
+        </div>
+        <p className="mt-6 text-xs text-gray-300">Powered by Hylink Australia</p>
+      </div>
+
+      {/* Right panel — login form */}
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+        {/* Mobile logo */}
+        <div className="mb-8 lg:hidden text-center">
           <img
-            src={hylinkLogo}
-            alt="Hylink"
-            className="mx-auto mb-4 w-48 drop-shadow-lg"
+            src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+            alt="Chery Australia"
+            className="mx-auto w-40 object-contain"
+            crossOrigin="anonymous"
           />
-          <p className="text-sm text-gray-500 tracking-wide uppercase">Internal Management Portal</p>
         </div>
 
-        {/* Form card */}
-        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 shadow-2xl">
-          <h2 className="mb-6 text-lg font-semibold text-white">Sign in to your account</h2>
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900">Welcome back</h2>
+            <p className="mt-1 text-sm text-gray-400">Sign in to your account to continue</p>
+          </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div>
-              <label htmlFor="email" className="label text-gray-300">
+              <label htmlFor="email" className="label">
                 Email address
               </label>
               <input
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@hylink.com.au"
+                placeholder="you@company.com"
                 {...register('email')}
-                className="input mt-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-primary-500"
+                className="input mt-1"
               />
               {errors.email && (
-                <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
+                <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="label text-gray-300">
+              <label htmlFor="password" className="label">
                 Password
               </label>
               <input
@@ -83,15 +107,15 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 {...register('password')}
-                className="input mt-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-primary-500"
+                className="input mt-1"
               />
               {errors.password && (
-                <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>
+                <p className="mt-1.5 text-xs text-red-500">{errors.password.message}</p>
               )}
             </div>
 
             {serverError && (
-              <div className="rounded-lg bg-red-900/40 border border-red-700/50 px-4 py-3 text-sm text-red-300">
+              <div className="rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
                 {serverError}
               </div>
             )}
@@ -99,7 +123,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary w-full py-2.5"
+              className="btn-primary w-full py-2.5 mt-2"
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">

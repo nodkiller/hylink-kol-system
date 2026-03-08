@@ -42,21 +42,20 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   return (
-    <aside className="flex h-full w-60 flex-col bg-gray-900 border-r border-gray-800">
-      {/* Brand */}
-      <div className="flex h-16 items-center gap-3 px-5 border-b border-gray-800">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white text-sm font-bold flex-shrink-0">
-          H
-        </div>
-        <div>
-          <p className="text-sm font-bold text-white leading-tight">Hylink</p>
-          <p className="text-xs text-gray-500 leading-tight">KOL System</p>
-        </div>
+    <aside className="flex h-full w-60 flex-col bg-white border-r border-gray-200">
+      {/* Chery Logo */}
+      <div className="flex h-16 items-center px-5 border-b border-gray-100">
+        <img
+          src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+          alt="Chery"
+          className="h-7 w-auto object-contain"
+          crossOrigin="anonymous"
+        />
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto">
-        <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
           Management
         </p>
         {NAV_ITEMS.map((item) => (
@@ -67,8 +66,8 @@ export default function Sidebar() {
               clsx(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary-500/15 text-primary-300 border border-primary-500/20'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white border border-transparent',
+                  ? 'bg-primary-50 text-primary-600 border border-primary-100'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 border border-transparent',
               )
             }
           >
@@ -79,8 +78,9 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-800 p-3">
-        <p className="px-3 text-xs text-gray-600">v0.1.0 · Hylink Australia</p>
+      <div className="border-t border-gray-100 px-5 py-4">
+        <p className="text-[11px] font-medium text-gray-400">KOL Management Platform</p>
+        <p className="text-[10px] text-gray-300 mt-0.5">Powered by Hylink Australia</p>
       </div>
     </aside>
   );
