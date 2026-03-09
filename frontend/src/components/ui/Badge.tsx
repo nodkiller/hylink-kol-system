@@ -8,14 +8,14 @@ interface BadgeProps {
 }
 
 const VARIANT_CLASS = {
-  gray:   'bg-gray-800 text-gray-300 ring-gray-700',
-  green:  'bg-green-900/40 text-green-400 ring-green-700/50',
-  blue:   'bg-blue-900/40 text-blue-400 ring-blue-700/50',
-  purple: 'bg-purple-900/40 text-purple-400 ring-purple-700/50',
-  orange: 'bg-orange-900/40 text-orange-400 ring-orange-700/50',
-  red:    'bg-red-900/40 text-red-400 ring-red-700/50',
-  yellow: 'bg-yellow-900/40 text-yellow-400 ring-yellow-700/50',
-  pink:   'bg-pink-900/40 text-pink-400 ring-pink-700/50',
+  gray:   'bg-gray-100 text-gray-600 ring-gray-200',
+  green:  'bg-green-50 text-green-700 ring-green-200',
+  blue:   'bg-blue-50 text-blue-700 ring-blue-200',
+  purple: 'bg-purple-50 text-purple-700 ring-purple-200',
+  orange: 'bg-orange-50 text-orange-700 ring-orange-200',
+  red:    'bg-red-50 text-red-600 ring-red-200',
+  yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-200',
+  pink:   'bg-pink-50 text-pink-700 ring-pink-200',
 };
 
 export function Badge({ children, variant = 'gray', size = 'sm' }: BadgeProps) {
@@ -58,9 +58,7 @@ const PLATFORM_VARIANT: Record<PlatformName, BadgeProps['variant']> = {
 };
 
 export function PlatformBadge({ platform }: { platform: PlatformName }) {
-  return (
-    <Badge variant={PLATFORM_VARIANT[platform]}>{platform}</Badge>
-  );
+  return <Badge variant={PLATFORM_VARIANT[platform]}>{platform}</Badge>;
 }
 
 // ─── Blacklisted Badge ─────────────────────────────────────────────────────────

@@ -8,17 +8,10 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export default function Pagination({
-  page,
-  totalPages,
-  total,
-  limit,
-  onPageChange,
-}: PaginationProps) {
+export default function Pagination({ page, totalPages, total, limit, onPageChange }: PaginationProps) {
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
 
-  // Build visible page numbers with ellipsis
   const getPageNumbers = () => {
     if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
     if (page <= 4) return [1, 2, 3, 4, 5, '...', totalPages];
@@ -28,18 +21,16 @@ export default function Pagination({
 
   return (
     <div className="flex items-center justify-between px-1 py-3">
-      {/* Info */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-400">
         {total === 0 ? 'No results' : `Showing ${from}–${to} of ${total}`}
       </p>
 
-      {/* Controls */}
       {totalPages > 1 && (
         <div className="flex items-center gap-1">
           <button
             disabled={page === 1}
             onClick={() => onPageChange(page - 1)}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -56,8 +47,8 @@ export default function Pagination({
                 className={clsx(
                   'h-8 min-w-[2rem] rounded-lg px-2 text-sm font-medium transition-colors',
                   p === page
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:bg-gray-800',
+                    ? 'bg-primary-500 text-white'
+                    : 'text-gray-500 hover:bg-gray-100',
                 )}
               >
                 {p}
@@ -68,7 +59,7 @@ export default function Pagination({
           <button
             disabled={page === totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
