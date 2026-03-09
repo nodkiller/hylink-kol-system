@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import cheryLogo from '@/assets/chery-logo.png';
 import { useNavigate } from 'react-router-dom';
 import {
   PieChart, Pie, Cell, Tooltip, Legend,
@@ -438,10 +439,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <img
-          src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+          src={cheryLogo}
           alt="Chery Australia"
           className="h-8 w-auto object-contain opacity-80"
-          crossOrigin="anonymous"
         />
       </div>
 

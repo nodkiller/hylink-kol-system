@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import cheryLogo from '@/assets/chery-logo.png';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -42,10 +43,9 @@ export default function LoginPage() {
       {/* Left panel — branding */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-white border-r border-gray-100 px-16">
         <img
-          src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+          src={cheryLogo}
           alt="Chery Australia"
           className="w-52 mb-10 object-contain"
-          crossOrigin="anonymous"
         />
         <h1 className="text-2xl font-semibold text-gray-900 text-center leading-snug">
           KOL Management Platform
@@ -66,10 +66,9 @@ export default function LoginPage() {
         {/* Mobile logo */}
         <div className="mb-8 lg:hidden text-center">
           <img
-            src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+            src={cheryLogo}
             alt="Chery Australia"
             className="mx-auto w-40 object-contain"
-            crossOrigin="anonymous"
           />
         </div>
 

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
+import cheryLogo from '@/assets/chery-logo.png';
 
 const NAV_ITEMS = [
   {
@@ -46,10 +47,9 @@ export default function Sidebar() {
       {/* Chery Logo */}
       <div className="flex h-16 items-center px-5 border-b border-gray-100">
         <img
-          src="https://cherymotor.com.au/sites/default/files/2024-08/560ffd6e-af3d-42f2-a10c-563f1355137e.png"
+          src={cheryLogo}
           alt="Chery"
           className="h-7 w-auto object-contain"
-          crossOrigin="anonymous"
         />
       </div>
 
