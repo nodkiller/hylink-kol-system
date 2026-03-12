@@ -39,6 +39,15 @@ export interface AddKolsResult {
   blacklisted: { id: string; name: string }[]; // blocked from being added
 }
 
+// ─── Tracking code generator ───────────────────────────────────────────────────
+
+function generateTrackingCode(campaignName: string, kolName: string): string {
+  const slug = (s: string) =>
+    s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5);
+  const rand = Math.random().toString(36).slice(2, 6);
+  return `${slug(campaignName)}-${slug(kolName)}-${rand}`;
+}
+
 // ─── Sort field whitelist ──────────────────────────────────────────────────────
 
 const CAMPAIGN_SORT_FIELDS: Record<string, string> = {
@@ -224,13 +233,16 @@ export class CampaignsService {
     // 4. Batch-create new campaign-KOL records
     let added: CampaignKol[] = [];
     if (toCreate.length > 0) {
-      const newRecords = toCreate.map((kolId) =>
-        this.campaignKolRepo.create({
+      const campaign = await this.campaignRepo.findOne({ where: { id: campaignId } });
+      const newRecords = toCreate.map((kolId) => {
+        const kol = foundKolMap.get(kolId)!;
+        return this.campaignKolRepo.create({
           campaignId,
           kolId,
           status: CampaignKolStatus.SHORTLISTED,
-        }),
-      );
+          trackingCode: generateTrackingCode(campaign?.name ?? campaignId, kol.name),
+        });
+      });
       const savedRecords = await this.campaignKolRepo.save(newRecords);
 
       // Return records with KOL data populated

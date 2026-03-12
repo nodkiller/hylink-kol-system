@@ -62,3 +62,12 @@ export enum PostSentiment {
   NEUTRAL = 'Neutral',
   NEGATIVE = 'Negative',
 }
+
+export enum LeadStatus {
+  NEW = 'New',
+  CONTACTED = 'Contacted',
+  TEST_DRIVE_BOOKED = 'TestDriveBooked',
+  TEST_DRIVE_COMPLETED = 'TestDriveCompleted',
+  CONVERTED = 'Converted',
+  LOST = 'Lost',
+}

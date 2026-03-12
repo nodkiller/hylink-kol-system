@@ -201,3 +201,33 @@ export interface KolQueryParams {
   sortBy?: string;
   order?: 'ASC' | 'DESC';
 }
+
+// ─── Lead Types ────────────────────────────────────────────────────────────────
+
+export enum LeadStatus {
+  NEW = 'New',
+  CONTACTED = 'Contacted',
+  TEST_DRIVE_BOOKED = 'TestDriveBooked',
+  TEST_DRIVE_COMPLETED = 'TestDriveCompleted',
+  CONVERTED = 'Converted',
+  LOST = 'Lost',
+}
+
+export interface Lead {
+  id: string;
+  campaignKolId: string;
+  trackingCode: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  status: LeadStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeadStats {
+  total: number;
+  byStatus: Partial<Record<LeadStatus, number>>;
+}

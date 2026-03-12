@@ -105,6 +105,14 @@ export class CampaignKol {
   @Column({ name: 'status_updated_at', type: 'timestamptz', default: () => 'NOW()' })
   statusUpdatedAt: Date;
 
+  /**
+   * Unique short code used in tracking links.
+   * Format: {campaignSlug}-{kolSlug}-{rand4}  e.g. "q1ig-anita-k8m2"
+   * Auto-generated when KOL is first added to the campaign.
+   */
+  @Column({ name: 'tracking_code', length: 60, nullable: true, unique: true })
+  trackingCode: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

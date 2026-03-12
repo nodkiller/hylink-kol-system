@@ -41,6 +41,7 @@ export interface Campaign {
 }
 
 export interface CampaignKolRecord {
+  trackingCode?: string;
   id: string;
   campaignId: string;
   kolId: string;

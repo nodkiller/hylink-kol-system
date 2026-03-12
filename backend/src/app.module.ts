@@ -19,6 +19,8 @@ import { CampaignKolPost } from './modules/campaigns/entities/campaign-kol-post.
 import { PortalModule } from './modules/portal/portal.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { InfluencerSearchModule } from './modules/influencer-search/influencer-search.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { Lead } from './modules/leads/entities/lead.entity';
 
 @Module({
   imports: [
@@ -42,7 +44,7 @@ import { InfluencerSearchModule } from './modules/influencer-search/influencer-s
           return {
             type: 'postgres',
             url: databaseUrl,
-            entities: [User, Kol, KolPlatform, Campaign, CampaignKol, CampaignKolPost],
+            entities: [User, Kol, KolPlatform, Campaign, CampaignKol, CampaignKolPost, Lead],
             synchronize: config.get<boolean>('DB_SYNCHRONIZE', true),
             logging: false,
             ssl,
@@ -57,7 +59,7 @@ import { InfluencerSearchModule } from './modules/influencer-search/influencer-s
           username: config.get<string>('DB_USERNAME', 'postgres'),
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_DATABASE', 'hylink_kol'),
-          entities: [User, Kol, KolPlatform, Campaign, CampaignKol, CampaignKolPost],
+          entities: [User, Kol, KolPlatform, Campaign, CampaignKol, CampaignKolPost, Lead],
           synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
           logging: config.get<boolean>('DB_LOGGING', false),
           ssl,
@@ -73,6 +75,7 @@ import { InfluencerSearchModule } from './modules/influencer-search/influencer-s
     PortalModule,
     ReportingModule,
     InfluencerSearchModule,
+    LeadsModule,
   ],
 
   providers: [
