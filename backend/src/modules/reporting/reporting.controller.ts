@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { ReportingService } from './reporting.service';
+import { CreateBenchmarkDto } from './dto/create-benchmark.dto';
 
 @Controller('reporting')
 export class ReportingController {
@@ -10,6 +11,25 @@ export class ReportingController {
   @Get('dashboard')
   async getDashboardStats() {
     return this.reportingService.getDashboardStats();
+  }
+
+  /** ROI comparison: KOL vs media benchmarks + per-KOL performance table. */
+  @Get('roi')
+  async getROIStats() {
+    return this.reportingService.getROIStats();
+  }
+
+  /** Create a media channel benchmark entry (SEM, Meta, etc.). */
+  @Post('benchmarks')
+  async createBenchmark(@Body() dto: CreateBenchmarkDto) {
+    return this.reportingService.createBenchmark(dto);
+  }
+
+  /** Delete a benchmark entry by ID. */
+  @Delete('benchmarks/:id')
+  @HttpCode(204)
+  async deleteBenchmark(@Param('id') id: string) {
+    await this.reportingService.deleteBenchmark(id);
   }
 
   /** Generate and stream a PDF performance report for a single campaign. */

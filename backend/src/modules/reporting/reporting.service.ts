@@ -5,6 +5,8 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { Campaign } from '../campaigns/entities/campaign.entity';
 import { CampaignKol } from '../campaigns/entities/campaign-kol.entity';
 import { Kol } from '../kols/entities/kol.entity';
+import { MediaBenchmark } from './entities/media-benchmark.entity';
+import { CreateBenchmarkDto } from './dto/create-benchmark.dto';
 import { CampaignKolStatus } from '../../common/enums';
 
 // ─── PDF constants ─────────────────────────────────────────────────────────────
@@ -42,6 +44,8 @@ export class ReportingService {
     private readonly ckRepo: Repository<CampaignKol>,
     @InjectRepository(Kol)
     private readonly kolRepo: Repository<Kol>,
+    @InjectRepository(MediaBenchmark)
+    private readonly benchmarkRepo: Repository<MediaBenchmark>,
   ) {}
 
   // ── Dashboard stats ──────────────────────────────────────────────────────────
@@ -206,6 +210,130 @@ export class ReportingService {
         netProfit:     Number(r.revenue) - Number(r.kolCost) - Number(r.otherExpenses),
       })),
     };
+  }
+
+  // ── ROI Dashboard ─────────────────────────────────────────────────────────────
+
+  async getROIStats() {
+    // 1. KOL aggregate: total spend + lead funnel across all campaigns
+    const [kolAgg] = await this.ckRepo.query(`
+      SELECT
+        COALESCE(SUM(ck.negotiated_fee), 0)::float                                                         AS spend,
+        COUNT(l.id)::int                                                                                    AS leads,
+        COUNT(CASE WHEN l.status IN ('TestDriveBooked', 'TestDriveCompleted') THEN 1 END)::int             AS test_drives,
+        COUNT(CASE WHEN l.status = 'Converted' THEN 1 END)::int                                            AS conversions
+      FROM campaign_kols ck
+      LEFT JOIN leads l ON l.campaign_kol_id = ck.id
+    `);
+
+    const kolSpend       = Number(kolAgg.spend);
+    const kolLeads       = Number(kolAgg.leads);
+    const kolTestDrives  = Number(kolAgg.test_drives);
+    const kolConversions = Number(kolAgg.conversions);
+
+    const kolChannel = {
+      channel:         'KOL',
+      spend:           kolSpend,
+      leads:           kolLeads,
+      testDrives:      kolTestDrives,
+      conversions:     kolConversions,
+      cpl:             kolLeads > 0 ? kolSpend / kolLeads : null,
+      testDriveRate:   kolLeads > 0 ? kolTestDrives  / kolLeads : null,
+      conversionRate:  kolLeads > 0 ? kolConversions / kolLeads : null,
+    };
+
+    // 2. Per-KOL performance breakdown
+    const kolRows: Record<string, string>[] = await this.ckRepo.query(`
+      SELECT
+        kol.name                                                                                            AS kol_name,
+        c.name                                                                                              AS campaign_name,
+        ck.tracking_code,
+        COALESCE(ck.negotiated_fee, 0)::float                                                              AS spend,
+        COUNT(l.id)::int                                                                                    AS leads,
+        COUNT(CASE WHEN l.status IN ('TestDriveBooked', 'TestDriveCompleted') THEN 1 END)::int             AS test_drives,
+        COUNT(CASE WHEN l.status = 'Converted' THEN 1 END)::int                                            AS conversions
+      FROM campaign_kols ck
+      JOIN kols kol ON kol.id = ck.kol_id
+      JOIN campaigns c   ON c.id   = ck.campaign_id
+      LEFT JOIN leads l  ON l.campaign_kol_id = ck.id
+      GROUP BY kol.name, c.name, ck.tracking_code, ck.negotiated_fee
+      HAVING ck.negotiated_fee IS NOT NULL OR COUNT(l.id) > 0
+      ORDER BY COUNT(l.id) DESC, ck.negotiated_fee DESC NULLS LAST
+      LIMIT 30
+    `);
+
+    // 3. Benchmarks — aggregate per channel
+    const benchmarks = await this.benchmarkRepo.find({ order: { createdAt: 'DESC' } });
+
+    const channelMap = new Map<string, { spend: number; leads: number; testDrives: number; conversions: number }>();
+    for (const b of benchmarks) {
+      const cur = channelMap.get(b.channel) ?? { spend: 0, leads: 0, testDrives: 0, conversions: 0 };
+      channelMap.set(b.channel, {
+        spend:       cur.spend       + Number(b.spend),
+        leads:       cur.leads       + Number(b.leads),
+        testDrives:  cur.testDrives  + Number(b.testDrives),
+        conversions: cur.conversions + Number(b.conversions),
+      });
+    }
+    const benchmarkChannels = Array.from(channelMap.entries()).map(([channel, d]) => ({
+      channel,
+      ...d,
+      cpl:            d.leads > 0 ? d.spend / d.leads : null,
+      testDriveRate:  d.leads > 0 ? d.testDrives  / d.leads : null,
+      conversionRate: d.leads > 0 ? d.conversions / d.leads : null,
+    }));
+
+    return {
+      channels: [kolChannel, ...benchmarkChannels],
+      topKols: kolRows.map((r) => ({
+        kolName:        r.kol_name,
+        campaignName:   r.campaign_name,
+        trackingCode:   r.tracking_code ?? null,
+        spend:          Number(r.spend),
+        leads:          Number(r.leads),
+        testDrives:     Number(r.test_drives),
+        conversions:    Number(r.conversions),
+        cpl:            Number(r.leads) > 0 ? Number(r.spend) / Number(r.leads) : null,
+        conversionRate: Number(r.leads) > 0 ? Number(r.conversions) / Number(r.leads) : null,
+      })),
+      benchmarks: benchmarks.map((b) => ({
+        id:             b.id,
+        channel:        b.channel,
+        periodLabel:    b.periodLabel,
+        campaignId:     b.campaignId,
+        spend:          Number(b.spend),
+        leads:          Number(b.leads),
+        testDrives:     Number(b.testDrives),
+        conversions:    Number(b.conversions),
+        notes:          b.notes,
+        cpl:            Number(b.leads) > 0 ? Number(b.spend) / Number(b.leads) : null,
+        testDriveRate:  Number(b.leads) > 0 ? Number(b.testDrives)  / Number(b.leads) : null,
+        conversionRate: Number(b.leads) > 0 ? Number(b.conversions) / Number(b.leads) : null,
+        createdAt:      b.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  // ── Benchmark CRUD ────────────────────────────────────────────────────────────
+
+  async createBenchmark(dto: CreateBenchmarkDto): Promise<MediaBenchmark> {
+    const record = this.benchmarkRepo.create({
+      channel:     dto.channel,
+      periodLabel: dto.periodLabel ?? null,
+      campaignId:  dto.campaignId  ?? null,
+      spend:       dto.spend,
+      leads:       dto.leads,
+      testDrives:  dto.testDrives,
+      conversions: dto.conversions,
+      notes:       dto.notes ?? null,
+    });
+    return this.benchmarkRepo.save(record);
+  }
+
+  async deleteBenchmark(id: string): Promise<void> {
+    const record = await this.benchmarkRepo.findOne({ where: { id } });
+    if (!record) throw new NotFoundException(`Benchmark "${id}" not found`);
+    await this.benchmarkRepo.delete(id);
   }
 
   // ── Campaign PDF report ──────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import CampaignsPage from '@/pages/campaigns/CampaignsPage';
 import CampaignDetailPage from '@/pages/campaigns/CampaignDetailPage';
 import PortalPage from '@/pages/portal/PortalPage';
 import InfluencerSearchPage from '@/pages/influencer-search/InfluencerSearchPage';
+import ROIPage from '@/pages/ROIPage';
 import type { ReactNode } from 'react';
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="campaigns/:id" element={<CampaignDetailPage />} />
           <Route path="influencer-search" element={<InfluencerSearchPage />} />
+          <Route path="roi" element={<ROIPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

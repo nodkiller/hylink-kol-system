@@ -1,5 +1,63 @@
 import apiClient from './client';
 
+// ─── ROI Types ─────────────────────────────────────────────────────────────────
+
+export interface ROIChannel {
+  channel: string;
+  spend: number;
+  leads: number;
+  testDrives: number;
+  conversions: number;
+  cpl: number | null;
+  testDriveRate: number | null;
+  conversionRate: number | null;
+}
+
+export interface KolPerformanceRow {
+  kolName: string;
+  campaignName: string;
+  trackingCode: string | null;
+  spend: number;
+  leads: number;
+  testDrives: number;
+  conversions: number;
+  cpl: number | null;
+  conversionRate: number | null;
+}
+
+export interface BenchmarkEntry {
+  id: string;
+  channel: string;
+  periodLabel: string | null;
+  campaignId: string | null;
+  spend: number;
+  leads: number;
+  testDrives: number;
+  conversions: number;
+  notes: string | null;
+  cpl: number | null;
+  testDriveRate: number | null;
+  conversionRate: number | null;
+  createdAt: string;
+}
+
+export interface ROIStats {
+  channels: ROIChannel[];
+  topKols: KolPerformanceRow[];
+  benchmarks: BenchmarkEntry[];
+}
+
+export interface CreateBenchmarkPayload {
+  channel: string;
+  periodLabel?: string;
+  campaignId?: string;
+  spend: number;
+  leads: number;
+  testDrives: number;
+  conversions: number;
+  notes?: string;
+}
+
 export interface CampaignPnl {
   id: string;
   name: string;
@@ -54,6 +112,15 @@ export interface DashboardStats {
 export const reportingApi = {
   getDashboardStats: () =>
     apiClient.get<DashboardStats>('/reporting/dashboard').then((r) => r.data),
+
+  getROIStats: () =>
+    apiClient.get<ROIStats>('/reporting/roi').then((r) => r.data),
+
+  createBenchmark: (payload: CreateBenchmarkPayload) =>
+    apiClient.post('/reporting/benchmarks', payload).then((r) => r.data),
+
+  deleteBenchmark: (id: string) =>
+    apiClient.delete(`/reporting/benchmarks/${id}`),
 
   /** Downloads the campaign PDF and triggers a browser save-as dialog. */
   downloadCampaignReport: async (campaignId: string, campaignName: string) => {
