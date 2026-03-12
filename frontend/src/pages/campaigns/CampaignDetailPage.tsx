@@ -206,7 +206,7 @@ export default function CampaignDetailPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-white">{campaign.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{campaign.name}</h1>
               <Badge variant={STATUS_VARIANT[campaign.status] ?? 'gray'}>{campaign.status}</Badge>
             </div>
             <p className="mt-0.5 text-sm text-gray-500">{campaign.clientName}</p>

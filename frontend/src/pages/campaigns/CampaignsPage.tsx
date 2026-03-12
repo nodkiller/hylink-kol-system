@@ -86,7 +86,7 @@ export default function CampaignsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Campaigns</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
           <p className="mt-0.5 text-sm text-gray-500">{campaigns.length} campaign{campaigns.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => { setEditCampaign(null); setModalOpen(true); }} className="btn-primary gap-2">
