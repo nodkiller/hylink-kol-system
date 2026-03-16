@@ -20,7 +20,7 @@ export class MediaBenchmark {
   channel: string;
 
   /** Free-text period label shown on the dashboard, e.g. "Q1 2025" */
-  @Column({ name: 'period_label', length: 100, nullable: true })
+  @Column({ name: 'period_label', type: 'varchar', length: 100, nullable: true })
   periodLabel: string | null;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
