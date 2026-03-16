@@ -3,7 +3,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log'],
+  });
+
+  // ── Health check (Railway uses this to confirm app is alive) ───
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.get('/health', (_req: unknown, res: { json: (o: object) => void }) => {
+    res.json({ status: 'ok', uptime: process.uptime() });
+  });
 
   // ── Global prefix ─────────────────────────────────────────────
   app.setGlobalPrefix('api/v1');
