@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 
+import { HealthController } from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { KolsModule } from './modules/kols/kols.module';
@@ -78,6 +79,8 @@ import { MediaBenchmark } from './modules/reporting/entities/media-benchmark.ent
     InfluencerSearchModule,
     LeadsModule,
   ],
+
+  controllers: [HealthController],
 
   providers: [
     // Register JwtAuthGuard globally — all routes require auth by default.
