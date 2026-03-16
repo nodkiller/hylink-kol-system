@@ -26,7 +26,7 @@ function CampaignCard({ campaign, onClick }: { campaign: Campaign; onClick: () =
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-gray-100 group-hover:text-primary-300 truncate transition-colors">
+            <h3 className="font-semibold text-gray-900 group-hover:text-primary-600 truncate transition-colors">
               {campaign.name}
             </h3>
             <Badge variant={STATUS_VARIANT[campaign.status as CampaignStatus] ?? 'gray'}>
@@ -35,7 +35,7 @@ function CampaignCard({ campaign, onClick }: { campaign: Campaign; onClick: () =
           </div>
           <p className="mt-1 text-sm text-gray-500">{campaign.clientName}</p>
         </div>
-        <svg className="h-5 w-5 text-gray-300 group-hover:text-primary-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-5 w-5 text-gray-400 group-hover:text-primary-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </div>
@@ -44,7 +44,7 @@ function CampaignCard({ campaign, onClick }: { campaign: Campaign; onClick: () =
       {total > 0 && (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {Object.entries(summary).map(([status, count]) => (
-            <span key={status} className="rounded-full bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+            <span key={status} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
               {status.replace(/_/g, ' ')}: <strong>{count}</strong>
             </span>
           ))}
@@ -59,7 +59,7 @@ function CampaignCard({ campaign, onClick }: { campaign: Campaign; onClick: () =
       )}
 
       {/* KOL count badge */}
-      <div className="mt-3 flex items-center gap-1 text-xs text-gray-400">
+      <div className="mt-3 flex items-center gap-1 text-xs text-gray-500">
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
         </svg>
