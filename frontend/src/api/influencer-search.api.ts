@@ -11,6 +11,9 @@ export interface InstagramUser {
   is_business_account: boolean;
   profile_pic_url: string;
   pk: string;
+  // Optional fields that may be present in API responses
+  engagement_rate?: number;
+  location?: string;
 }
 
 export const influencerSearchApi = {

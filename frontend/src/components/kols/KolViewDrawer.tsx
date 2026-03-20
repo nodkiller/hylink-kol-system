@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { Link } from 'react-router-dom';
 import { TierBadge, PlatformBadge, BlacklistedBadge } from '@/components/ui/Badge';
 import type { Kol } from '@/types';
 
@@ -87,6 +88,16 @@ export default function KolViewDrawer({ kol, onClose, onEdit }: Props) {
               </div>
 
               <div className="flex items-center gap-1 flex-shrink-0">
+                <Link
+                  to={`/kols/${kol.id}`}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 border border-gray-200 transition-colors"
+                  onClick={onClose}
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Full Profile
+                </Link>
                 <button
                   onClick={() => onEdit(kol)}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-50 border border-primary-200 transition-colors"

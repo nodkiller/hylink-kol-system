@@ -17,6 +17,9 @@ interface Props {
   onView: (kol: Kol) => void;
   onEdit: (kol: Kol) => void;
   onRowClick?: (kol: Kol) => void;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onToggleSelectAll?: () => void;
 }
 
 function formatFollowers(n?: number) {
@@ -80,11 +83,13 @@ function StarRating({ value }: { value?: number }) {
   );
 }
 
-function KolCard({ kol, onView, onEdit, onRowClick }: {
+function KolCard({ kol, onView, onEdit, onRowClick, selected, onToggleSelect }: {
   kol: Kol;
   onView: (k: Kol) => void;
   onEdit: (k: Kol) => void;
   onRowClick?: (k: Kol) => void;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const sortedPlatforms = [...(kol.platforms ?? [])].sort(
     (a, b) => (b.followersCount ?? 0) - (a.followersCount ?? 0),
@@ -96,9 +101,21 @@ function KolCard({ kol, onView, onEdit, onRowClick }: {
         'flex items-start gap-0 border-b border-gray-100 last:border-0 hover:bg-gray-50/70 transition-colors',
         onRowClick && 'cursor-pointer',
         kol.isBlacklisted && 'opacity-60',
+        selected && 'bg-primary-50/50',
       )}
       onClick={() => onRowClick?.(kol)}
     >
+      {/* ── Checkbox ────────────────────────────────────────────────────────── */}
+      {onToggleSelect && (
+        <div className="flex items-center justify-center w-10 flex-shrink-0 py-5" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={selected ?? false}
+            onChange={() => onToggleSelect(kol.id)}
+            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          />
+        </div>
+      )}
       {/* ── Profile section ─────────────────────────────────────────────────── */}
       <div className="flex flex-shrink-0 gap-4 py-5 px-5 w-[300px]">
         {/* Avatar */}
@@ -214,11 +231,26 @@ function KolCard({ kol, onView, onEdit, onRowClick }: {
 export default function KolTable({
   data, total, page, limit, isLoading,
   onPageChange, onView, onEdit, onRowClick,
+  selectedIds, onToggleSelect, onToggleSelectAll,
 }: Props) {
+  const allSelected = data.length > 0 && data.every((k) => selectedIds?.has(k.id));
+  const someSelected = data.some((k) => selectedIds?.has(k.id));
+
   return (
     <div className="card overflow-hidden">
       {/* Column header */}
       <div className="flex items-center border-b border-gray-100 bg-gray-50 px-5 py-2.5">
+        {onToggleSelect && (
+          <div className="w-10 flex-shrink-0 flex items-center justify-center">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected; }}
+              onChange={onToggleSelectAll}
+              className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+          </div>
+        )}
         <div className="w-[300px] flex-shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-400">
           Creator
         </div>
@@ -243,11 +275,13 @@ export default function KolTable({
 
         {!isLoading && !data.length ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <svg className="h-10 w-10 text-gray-200 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
+            <svg className="h-12 w-12 text-gray-200 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <p className="text-sm font-medium text-gray-500">No KOLs found</p>
-            <p className="text-xs text-gray-400 mt-0.5">Try adjusting your filters or add a new KOL</p>
+            <p className="text-sm font-semibold text-gray-600">No KOLs found</p>
+            <p className="text-xs text-gray-400 mt-1 max-w-xs">
+              Try adjusting your filters, or add a new KOL to start building your database.
+            </p>
           </div>
         ) : (
           data.map((kol) => (
@@ -257,21 +291,25 @@ export default function KolTable({
               onView={onView}
               onEdit={onEdit}
               onRowClick={onRowClick}
+              selected={selectedIds?.has(kol.id)}
+              onToggleSelect={onToggleSelect}
             />
           ))
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="border-t border-gray-100 px-4">
-        <Pagination
-          page={page}
-          totalPages={Math.ceil(total / limit)}
-          total={total}
-          limit={limit}
-          onPageChange={onPageChange}
-        />
-      </div>
+      {/* Pagination — hide when all results fit on one page */}
+      {total > limit && (
+        <div className="border-t border-gray-100 px-4">
+          <Pagination
+            page={page}
+            totalPages={Math.ceil(total / limit)}
+            total={total}
+            limit={limit}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -5,18 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Chery red — primary brand accent
+        // Hylink Indigo — primary brand accent
         primary: {
-          50:  '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#EB5757',
-          600: '#d94444',
-          700: '#c03030',
-          800: '#9b2727',
-          900: '#7f1d1d',
+          50:  '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#4F46E5',
+          700: '#4338CA',
+          800: '#3730A3',
+          900: '#312E81',
         },
       },
       fontFamily: {

@@ -9,6 +9,7 @@ import {
   type CreateBenchmarkPayload,
 } from '@/api/reporting.api';
 import { PageSpinner } from '@/components/ui/Spinner';
+import clsx from 'clsx';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -28,8 +29,17 @@ function fmtPct(n: number | null) {
   return `${(n * 100).toFixed(1)}%`;
 }
 
+const TOOLTIP_STYLE = {
+  borderRadius: '8px',
+  border: '1px solid #E5E7EB',
+  fontSize: '12px',
+  backgroundColor: '#FFFFFF',
+  color: '#111827',
+  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08)',
+};
+
 const CHANNEL_COLORS: Record<string, string> = {
-  KOL:     '#EB5757',
+  KOL:     '#4F46E5',
   SEM:     '#4F86F7',
   Meta:    '#1877F2',
   Display: '#10b981',
@@ -41,153 +51,17 @@ function channelColor(ch: string) {
   return CHANNEL_COLORS[ch] ?? '#9ca3af';
 }
 
-// ─── CPL Comparison Bar Chart ─────────────────────────────────────────────────
+// ─── Tab types ────────────────────────────────────────────────────────────────
 
-const TOOLTIP_STYLE = {
-  borderRadius: '8px',
-  border: '1px solid #E5E7EB',
-  fontSize: '12px',
-  backgroundColor: '#FFFFFF',
-  color: '#111827',
-  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08)',
-};
+type Tab = 'performance' | 'roi' | 'benchmarks';
 
-function CplChart({ channels }: { channels: ROIChannel[] }) {
-  const data = channels
-    .filter((c) => c.cpl !== null)
-    .map((c) => ({ name: c.channel, cpl: Math.round(c.cpl!), fill: channelColor(c.channel) }));
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'performance', label: 'KOL Performance' },
+  { id: 'roi', label: 'ROI & Cost' },
+  { id: 'benchmarks', label: 'Benchmarks' },
+];
 
-  if (data.length === 0) {
-    return (
-      <div className="flex h-40 items-center justify-center text-sm text-gray-400">
-        Add benchmark data to compare channels
-      </div>
-    );
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height={180}>
-      <BarChart data={data} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7280' }} />
-        <YAxis
-          tick={{ fontSize: 10, fill: '#9CA3AF' }}
-          tickFormatter={(v) => `$${v}`}
-        />
-        <Tooltip
-          formatter={(v: number) => [`$${v}`, 'Cost per Lead']}
-          contentStyle={TOOLTIP_STYLE}
-        />
-        <Bar dataKey="cpl" radius={[6, 6, 0, 0]}>
-          {data.map((entry, i) => (
-            <Cell key={i} fill={entry.fill} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-// ─── Channel Comparison Table ─────────────────────────────────────────────────
-
-function ChannelTable({ channels }: { channels: ROIChannel[] }) {
-  const bestCpl = channels
-    .filter((c) => c.cpl !== null && c.leads > 0)
-    .reduce<number | null>((min, c) => (min === null || c.cpl! < min ? c.cpl! : min), null);
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs text-gray-400 uppercase tracking-wide">
-            <th className="px-4 py-3 font-semibold">Channel</th>
-            <th className="px-4 py-3 font-semibold text-right">Total Spend</th>
-            <th className="px-4 py-3 font-semibold text-right">Leads</th>
-            <th className="px-4 py-3 font-semibold text-right">Cost per Lead</th>
-            <th className="px-4 py-3 font-semibold text-right">Test Drive Rate</th>
-            <th className="px-4 py-3 font-semibold text-right">Conversion Rate</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-50">
-          {channels.map((c) => {
-            const isBest = c.cpl !== null && c.cpl === bestCpl && c.leads > 0;
-            return (
-              <tr key={c.channel} className={c.channel === 'KOL' ? 'bg-red-50/30' : ''}>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: channelColor(c.channel) }}
-                    />
-                    <span className="font-semibold text-gray-800">{c.channel}</span>
-                    {c.channel === 'KOL' && (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">
-                        This Platform
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-right text-gray-700">
-                  {c.spend > 0 ? fmtMoney(c.spend) : <span className="text-gray-300">—</span>}
-                </td>
-                <td className="px-4 py-3 text-right text-gray-700">{c.leads > 0 ? c.leads : <span className="text-gray-300">—</span>}</td>
-                <td className="px-4 py-3 text-right">
-                  {c.cpl !== null ? (
-                    <span className={`font-semibold ${isBest ? 'text-emerald-600' : 'text-gray-700'}`}>
-                      {fmtCpl(c.cpl)}
-                      {isBest && <span className="ml-1 text-xs">✓ Best</span>}
-                    </span>
-                  ) : (
-                    <span className="text-gray-300">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right text-gray-600">{fmtPct(c.testDriveRate)}</td>
-                <td className="px-4 py-3 text-right text-gray-600">{fmtPct(c.conversionRate)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// ─── KOL Funnel ───────────────────────────────────────────────────────────────
-
-function KolFunnel({ kol }: { kol: ROIChannel }) {
-  const steps = [
-    { label: 'Total Leads', value: kol.leads, color: 'bg-blue-500' },
-    { label: 'Test Drives', value: kol.testDrives, color: 'bg-amber-500' },
-    { label: 'Conversions', value: kol.conversions, color: 'bg-emerald-500' },
-  ];
-  const maxVal = Math.max(kol.leads, 1);
-
-  return (
-    <div className="space-y-3">
-      {steps.map((step, i) => (
-        <div key={i}>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500">{step.label}</span>
-            <span className="text-sm font-semibold text-gray-800">{step.value}</span>
-          </div>
-          <div className="h-2 w-full rounded-full bg-gray-100">
-            <div
-              className={`h-2 rounded-full transition-all ${step.color}`}
-              style={{ width: `${(step.value / maxVal) * 100}%` }}
-            />
-          </div>
-        </div>
-      ))}
-      {kol.leads === 0 && (
-        <p className="text-xs text-gray-400 pt-1">
-          No leads captured yet. Share tracking links to start collecting.
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ─── Top KOLs Table ───────────────────────────────────────────────────────────
+// ─── Performance Tab ──────────────────────────────────────────────────────────
 
 type SortKey = 'leads' | 'spend' | 'cpl' | 'conversionRate';
 
@@ -217,30 +91,18 @@ function TopKolsTable({ rows }: { rows: KolPerformanceRow[] }) {
           <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs text-gray-400 uppercase tracking-wide">
             <th className="px-4 py-3 font-semibold">KOL</th>
             <th className="px-4 py-3 font-semibold">Campaign</th>
-            <th
-              className="px-4 py-3 font-semibold text-right cursor-pointer select-none"
-              onClick={() => toggleSort('spend')}
-            >
+            <th className="px-4 py-3 font-semibold text-right cursor-pointer select-none" onClick={() => toggleSort('spend')}>
               Spend <SortIcon k="spend" />
             </th>
-            <th
-              className="px-4 py-3 font-semibold text-right cursor-pointer select-none"
-              onClick={() => toggleSort('leads')}
-            >
+            <th className="px-4 py-3 font-semibold text-right cursor-pointer select-none" onClick={() => toggleSort('leads')}>
               Leads <SortIcon k="leads" />
             </th>
-            <th className="px-4 py-3 font-semibold text-right">Test Drives</th>
-            <th className="px-4 py-3 font-semibold text-right">Conversions</th>
-            <th
-              className="px-4 py-3 font-semibold text-right cursor-pointer select-none"
-              onClick={() => toggleSort('cpl')}
-            >
+            <th className="px-4 py-3 font-semibold text-right">Qualified</th>
+            <th className="px-4 py-3 font-semibold text-right">Converted</th>
+            <th className="px-4 py-3 font-semibold text-right cursor-pointer select-none" onClick={() => toggleSort('cpl')}>
               CPL <SortIcon k="cpl" />
             </th>
-            <th
-              className="px-4 py-3 font-semibold text-right cursor-pointer select-none"
-              onClick={() => toggleSort('conversionRate')}
-            >
+            <th className="px-4 py-3 font-semibold text-right cursor-pointer select-none" onClick={() => toggleSort('conversionRate')}>
               Conv. Rate <SortIcon k="conversionRate" />
             </th>
           </tr>
@@ -281,17 +143,314 @@ function TopKolsTable({ rows }: { rows: KolPerformanceRow[] }) {
   );
 }
 
-// ─── Benchmark Modal ──────────────────────────────────────────────────────────
+function PerformanceTab({ kol, topKols }: { kol?: ROIChannel; topKols: KolPerformanceRow[] }) {
+  const steps = [
+    { label: 'Total Leads', value: kol?.leads ?? 0, color: 'bg-blue-500' },
+    { label: 'Qualified', value: kol?.testDrives ?? 0, color: 'bg-amber-500' },
+    { label: 'Converted', value: kol?.conversions ?? 0, color: 'bg-emerald-500' },
+  ];
+  const maxVal = Math.max(kol?.leads ?? 0, 1);
+
+  return (
+    <div className="space-y-5">
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Leads', value: (kol?.leads ?? 0).toString(), color: 'text-blue-600' },
+          { label: 'Qualified', value: (kol?.testDrives ?? 0).toString(), color: 'text-amber-600' },
+          { label: 'Converted', value: (kol?.conversions ?? 0).toString(), color: 'text-emerald-600' },
+          { label: 'Conversion Rate', value: fmtPct(kol?.conversionRate ?? null), color: 'text-gray-900' },
+        ].map(item => (
+          <div key={item.label} className="card p-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{item.label}</p>
+            <p className={clsx('mt-1 text-2xl font-bold', item.color)}>{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Funnel */}
+      <div className="card p-5">
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">KOL Lead Funnel</h3>
+        <div className="space-y-3 max-w-md">
+          {steps.map((step, i) => (
+            <div key={i}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-gray-500">{step.label}</span>
+                <span className="text-sm font-semibold text-gray-800">{step.value}</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-gray-100">
+                <div
+                  className={clsx('h-2 rounded-full transition-all', step.color)}
+                  style={{ width: `${(step.value / maxVal) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+          {(kol?.leads ?? 0) === 0 && (
+            <p className="text-xs text-gray-400 pt-1">
+              No leads captured yet. Share tracking links to start collecting.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Top KOLs */}
+      <div className="card overflow-hidden">
+        <div className="border-b border-gray-100 px-5 py-4">
+          <h3 className="text-sm font-semibold text-gray-900">KOL Performance Breakdown</h3>
+          <p className="mt-0.5 text-xs text-gray-400">KOLs with spend or leads · Click column headers to sort</p>
+        </div>
+        <TopKolsTable rows={topKols} />
+      </div>
+    </div>
+  );
+}
+
+// ─── ROI & Cost Tab ───────────────────────────────────────────────────────────
+
+function CplChart({ channels }: { channels: ROIChannel[] }) {
+  const data = channels
+    .filter((c) => c.cpl !== null)
+    .map((c) => ({ name: c.channel, cpl: Math.round(c.cpl!), fill: channelColor(c.channel) }));
+
+  if (data.length === 0) {
+    return (
+      <div className="flex h-40 items-center justify-center text-sm text-gray-400">
+        Add benchmark data to compare channels
+      </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={180}>
+      <BarChart data={data} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7280' }} />
+        <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} tickFormatter={(v) => `$${v}`} />
+        <Tooltip
+          formatter={(v: number) => [`$${v}`, 'Cost per Lead']}
+          contentStyle={TOOLTIP_STYLE}
+        />
+        <Bar dataKey="cpl" radius={[6, 6, 0, 0]}>
+          {data.map((entry, i) => (
+            <Cell key={i} fill={entry.fill} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+function ChannelTable({ channels }: { channels: ROIChannel[] }) {
+  const bestCpl = channels
+    .filter((c) => c.cpl !== null && c.leads > 0)
+    .reduce<number | null>((min, c) => (min === null || c.cpl! < min ? c.cpl! : min), null);
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs text-gray-400 uppercase tracking-wide">
+            <th className="px-4 py-3 font-semibold">Channel</th>
+            <th className="px-4 py-3 font-semibold text-right">Total Spend</th>
+            <th className="px-4 py-3 font-semibold text-right">Leads</th>
+            <th className="px-4 py-3 font-semibold text-right">Cost per Lead</th>
+            <th className="px-4 py-3 font-semibold text-right">Qualification Rate</th>
+            <th className="px-4 py-3 font-semibold text-right">Conversion Rate</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-50">
+          {channels.map((c) => {
+            const isBest = c.cpl !== null && c.cpl === bestCpl && c.leads > 0;
+            return (
+              <tr key={c.channel} className={c.channel === 'KOL' ? 'bg-primary-50/30' : ''}>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: channelColor(c.channel) }}
+                    />
+                    <span className="font-semibold text-gray-800">{c.channel}</span>
+                    {c.channel === 'KOL' && (
+                      <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-semibold text-primary-700">
+                        This Platform
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {c.spend > 0 ? fmtMoney(c.spend) : <span className="text-gray-300">—</span>}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {c.leads > 0 ? c.leads : <span className="text-gray-300">—</span>}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {c.cpl !== null ? (
+                    <span className={clsx('font-semibold', isBest ? 'text-emerald-600' : 'text-gray-700')}>
+                      {fmtCpl(c.cpl)}
+                      {isBest && <span className="ml-1 text-xs">✓ Best</span>}
+                    </span>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-600">{fmtPct(c.testDriveRate)}</td>
+                <td className="px-4 py-3 text-right text-gray-600">{fmtPct(c.conversionRate)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function RoiTab({ channels, kol, savings, avgOtherCpl, kolCpl }: {
+  channels: ROIChannel[];
+  kol?: ROIChannel;
+  savings: number | null;
+  avgOtherCpl: number | null;
+  kolCpl: number | null;
+}) {
+  return (
+    <div className="space-y-5">
+      {/* Savings banner */}
+      {savings !== null && kol && kol.leads > 0 && (
+        <div className={clsx(
+          'card px-6 py-4 flex items-center gap-4',
+          savings > 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100',
+        )}>
+          <div className={clsx(
+            'flex h-10 w-10 items-center justify-center rounded-xl text-white text-lg',
+            savings > 0 ? 'bg-emerald-500' : 'bg-amber-500',
+          )}>
+            {savings > 0 ? '🏆' : '📊'}
+          </div>
+          <div>
+            <p className={clsx('font-semibold', savings > 0 ? 'text-emerald-800' : 'text-amber-800')}>
+              {savings > 0
+                ? `KOL CPL is $${savings.toFixed(0)} cheaper than average paid media`
+                : `KOL CPL is $${Math.abs(savings).toFixed(0)} higher than average paid media`}
+            </p>
+            <p className={clsx('text-xs mt-0.5', savings > 0 ? 'text-emerald-600' : 'text-amber-600')}>
+              KOL: {fmtCpl(kolCpl)} per lead · Avg. other channels: {fmtCpl(avgOtherCpl)}
+              {savings > 0 && ` · ${((savings / avgOtherCpl!) * 100).toFixed(0)}% more efficient`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Chart + Table */}
+      <div className="grid gap-5 lg:grid-cols-5">
+        <div className="card p-5 lg:col-span-2">
+          <h3 className="text-sm font-semibold text-gray-900">CPL by Channel</h3>
+          <p className="mt-0.5 mb-4 text-xs text-gray-400">Lower is better</p>
+          <CplChart channels={channels.filter((c) => c.leads > 0 || c.spend > 0)} />
+        </div>
+        <div className="card overflow-hidden lg:col-span-3">
+          <div className="border-b border-gray-100 px-5 py-4">
+            <h3 className="text-sm font-semibold text-gray-900">Channel Comparison</h3>
+            <p className="mt-0.5 text-xs text-gray-400">KOL vs paid media benchmarks</p>
+          </div>
+          <ChannelTable channels={channels} />
+        </div>
+      </div>
+
+      {/* KOL cost summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {[
+          { label: 'KOL Total Spend', value: kol ? fmtMoney(kol.spend) : '—' },
+          { label: 'KOL Cost per Lead', value: fmtCpl(kolCpl) },
+          { label: 'Qualification Rate', value: fmtPct(kol?.testDriveRate ?? null) },
+        ].map(item => (
+          <div key={item.label} className="card p-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{item.label}</p>
+            <p className="mt-1 text-xl font-bold text-gray-900">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Benchmarks Tab ───────────────────────────────────────────────────────────
 
 const PRESET_CHANNELS = ['SEM', 'Meta', 'Display', 'WeChat', 'TikTok Ads', 'Other'];
 
-function BenchmarkModal({
-  onClose,
-  onSaved,
+function BenchmarkTab({
+  benchmarks,
+  onDelete,
+  onAdd,
 }: {
-  onClose: () => void;
-  onSaved: () => void;
+  benchmarks: BenchmarkEntry[];
+  onDelete: (id: string) => void;
+  onAdd: () => void;
 }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-500">
+            Enter spend &amp; lead data from other channels (SEM, Meta, etc.) to compare against KOL ROI.
+          </p>
+        </div>
+        <button onClick={onAdd} className="btn-primary gap-2 text-sm">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Add Benchmark
+        </button>
+      </div>
+
+      <div className="card p-5">
+        {benchmarks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <svg className="h-10 w-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <p className="text-sm">No benchmark data yet</p>
+            <p className="text-xs mt-1">Add paid media channel data to compare CPL against KOL performance</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {benchmarks.map((b) => (
+              <div key={b.id} className="flex items-start gap-4 py-3.5 px-1">
+                <span
+                  className="mt-0.5 h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: channelColor(b.channel) }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-800">{b.channel}</span>
+                    {b.periodLabel && (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
+                        {b.periodLabel}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Spend: {fmtMoney(b.spend)} · Leads: {b.leads} · CPL: {fmtCpl(b.cpl)} · Qualified: {b.testDrives} · Converted: {b.conversions}
+                  </p>
+                  {b.notes && <p className="text-xs text-gray-400 truncate mt-0.5">{b.notes}</p>}
+                </div>
+                <button
+                  onClick={() => onDelete(b.id)}
+                  className="flex-shrink-0 text-xs text-gray-300 hover:text-red-400 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Benchmark Add Modal ──────────────────────────────────────────────────────
+
+function BenchmarkModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
   const [form, setForm] = useState<CreateBenchmarkPayload>({
     channel: 'SEM',
     periodLabel: '',
@@ -323,7 +482,7 @@ function BenchmarkModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <h2 className="text-base font-semibold text-gray-900">Add Channel Benchmark</h2>
-            <p className="mt-0.5 text-xs text-gray-400">Enter spend &amp; lead data from SEM, Meta, or other channels to compare against KOL ROI.</p>
+            <p className="mt-0.5 text-xs text-gray-400">Enter spend &amp; lead data from other channels to compare CPL.</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
         </div>
@@ -338,11 +497,12 @@ function BenchmarkModal({
                   key={ch}
                   type="button"
                   onClick={() => { setUseCustom(false); set('channel', ch); }}
-                  className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+                  className={clsx(
+                    'rounded-full px-3 py-1 text-xs font-medium border transition-colors',
                     !useCustom && form.channel === ch
-                      ? 'bg-primary-500 text-white border-primary-500'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
-                  }`}
+                      ? 'bg-primary-600 text-white border-primary-600'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400',
+                  )}
                 >
                   {ch}
                 </button>
@@ -350,9 +510,10 @@ function BenchmarkModal({
               <button
                 type="button"
                 onClick={() => setUseCustom(true)}
-                className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
-                  useCustom ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
-                }`}
+                className={clsx(
+                  'rounded-full px-3 py-1 text-xs font-medium border transition-colors',
+                  useCustom ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400',
+                )}
               >
                 Custom
               </button>
@@ -363,12 +524,12 @@ function BenchmarkModal({
                 placeholder="Channel name"
                 value={customChannel}
                 onChange={(e) => setCustomChannel(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="input text-sm"
               />
             )}
           </div>
 
-          {/* Period label */}
+          {/* Period */}
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Period (optional)</label>
             <input
@@ -376,55 +537,50 @@ function BenchmarkModal({
               placeholder='e.g. "Q1 2025" or "Jan–Mar 2025"'
               value={form.periodLabel}
               onChange={(e) => set('periodLabel', e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="input text-sm"
             />
           </div>
 
-          {/* Spend + Leads row */}
+          {/* Spend + Leads */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Total Spend (AUD)</label>
               <input
-                type="number"
-                min={0}
-                step={100}
+                type="number" min={0} step={100}
                 value={form.spend}
                 onChange={(e) => set('spend', Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="input text-sm"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Total Leads</label>
               <input
-                type="number"
-                min={0}
+                type="number" min={0}
                 value={form.leads}
                 onChange={(e) => set('leads', Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="input text-sm"
               />
             </div>
           </div>
 
-          {/* Test Drives + Conversions row */}
+          {/* Qualified + Converted */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Test Drives</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Qualified Leads</label>
               <input
-                type="number"
-                min={0}
+                type="number" min={0}
                 value={form.testDrives}
                 onChange={(e) => set('testDrives', Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Conversions (Sales)</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Conversions</label>
               <input
-                type="number"
-                min={0}
+                type="number" min={0}
                 value={form.conversions}
                 onChange={(e) => set('conversions', Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="input text-sm"
               />
             </div>
           </div>
@@ -434,26 +590,16 @@ function BenchmarkModal({
             <label className="block text-xs font-medium text-gray-600 mb-1">Notes (optional)</label>
             <textarea
               rows={2}
-              placeholder="e.g. Google Ads campaign for Tiggo 7 Pro launch"
+              placeholder="e.g. Google Ads search campaign — Q1"
               value={form.notes}
               onChange={(e) => set('notes', e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+              className="input text-sm resize-none"
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={mutation.isPending}
-              className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
-            >
+            <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+            <button type="submit" disabled={mutation.isPending} className="btn-primary">
               {mutation.isPending ? 'Saving…' : 'Save Benchmark'}
             </button>
           </div>
@@ -463,61 +609,11 @@ function BenchmarkModal({
   );
 }
 
-// ─── Benchmark List ───────────────────────────────────────────────────────────
-
-function BenchmarkList({
-  benchmarks,
-  onDelete,
-}: {
-  benchmarks: BenchmarkEntry[];
-  onDelete: (id: string) => void;
-}) {
-  if (benchmarks.length === 0) {
-    return (
-      <p className="py-6 text-center text-sm text-gray-400">
-        No benchmark data yet. Click "Add Channel Benchmark" to add SEM or Meta data.
-      </p>
-    );
-  }
-
-  return (
-    <div className="divide-y divide-gray-50">
-      {benchmarks.map((b) => (
-        <div key={b.id} className="flex items-start gap-4 py-3 px-1">
-          <span
-            className="mt-0.5 h-2.5 w-2.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: channelColor(b.channel) }}
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-800">{b.channel}</span>
-              {b.periodLabel && (
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
-                  {b.periodLabel}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Spend: {fmtMoney(b.spend)} · Leads: {b.leads} · CPL: {fmtCpl(b.cpl)} · Test Drives: {b.testDrives} · Conversions: {b.conversions}
-            </p>
-            {b.notes && <p className="text-xs text-gray-400 truncate">{b.notes}</p>}
-          </div>
-          <button
-            onClick={() => onDelete(b.id)}
-            className="flex-shrink-0 text-xs text-gray-300 hover:text-red-400 transition-colors"
-          >
-            Remove
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── ROI Page ─────────────────────────────────────────────────────────────────
+// ─── Main Analytics Page ──────────────────────────────────────────────────────
 
 export default function ROIPage() {
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<Tab>('performance');
   const [showModal, setShowModal] = useState(false);
 
   const { data: roi, isLoading } = useQuery({
@@ -536,7 +632,6 @@ export default function ROIPage() {
   const kol = roi?.channels.find((c) => c.channel === 'KOL');
   const allChannels = roi?.channels ?? [];
 
-  // Compute KOL savings headline vs other channels
   const otherChannels = allChannels.filter((c) => c.channel !== 'KOL' && c.cpl !== null && c.leads > 0);
   const avgOtherCpl =
     otherChannels.length > 0
@@ -548,112 +643,62 @@ export default function ROIPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">KOL ROI Dashboard</h1>
-          <p className="mt-0.5 text-sm text-gray-400">
-            Compare KOL cost-per-lead against paid media channels to justify KOL investment.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-600 transition-colors"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Channel Benchmark
-        </button>
+      {/* Page header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+        <p className="mt-0.5 text-sm text-gray-500">
+          Track KOL performance and compare ROI against other marketing channels.
+        </p>
       </div>
 
-      {/* Headline savings banner */}
-      {savings !== null && kol && kol.leads > 0 && (
-        <div className={`card px-6 py-4 flex items-center gap-4 ${savings > 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'}`}>
-          <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-white text-lg ${savings > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
-            {savings > 0 ? '🏆' : '📊'}
-          </div>
-          <div>
-            <p className={`font-semibold ${savings > 0 ? 'text-emerald-800' : 'text-amber-800'}`}>
-              {savings > 0
-                ? `KOL CPL is $${savings.toFixed(0)} cheaper than average paid media`
-                : `KOL CPL is $${Math.abs(savings).toFixed(0)} higher than average paid media`}
-            </p>
-            <p className={`text-xs mt-0.5 ${savings > 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
-              KOL: {fmtCpl(kolCpl)} per lead · Avg. other channels: {fmtCpl(avgOtherCpl)}
-              {savings > 0 && ` · ${((savings / avgOtherCpl!) * 100).toFixed(0)}% more efficient`}
-            </p>
-          </div>
-        </div>
+      {/* Tab navigation */}
+      <div className="flex gap-1 border-b border-gray-200">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={clsx(
+              'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
+              activeTab === tab.id
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+            )}
+          >
+            {tab.label}
+            {tab.id === 'benchmarks' && (roi?.benchmarks?.length ?? 0) > 0 && (
+              <span className={clsx(
+                'ml-2 rounded-full px-2 py-0.5 text-xs font-semibold',
+                activeTab === tab.id ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500',
+              )}>
+                {roi!.benchmarks.length}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === 'performance' && (
+        <PerformanceTab kol={kol} topKols={roi?.topKols ?? []} />
       )}
 
-      {/* Channel comparison */}
-      <div className="grid gap-5 lg:grid-cols-5">
-        {/* CPL Bar Chart */}
-        <div className="card p-5 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-gray-900">CPL by Channel</h3>
-          <p className="mt-0.5 mb-4 text-xs text-gray-400">Lower is better</p>
-          <CplChart channels={allChannels.filter((c) => c.leads > 0 || c.spend > 0)} />
-        </div>
+      {activeTab === 'roi' && (
+        <RoiTab
+          channels={allChannels}
+          kol={kol}
+          savings={savings}
+          avgOtherCpl={avgOtherCpl}
+          kolCpl={kolCpl}
+        />
+      )}
 
-        {/* Comparison table */}
-        <div className="card overflow-hidden lg:col-span-3">
-          <div className="border-b border-gray-100 px-5 py-4">
-            <h3 className="text-sm font-semibold text-gray-900">Channel Comparison</h3>
-            <p className="mt-0.5 text-xs text-gray-400">KOL vs paid media benchmarks</p>
-          </div>
-          <ChannelTable channels={allChannels} />
-        </div>
-      </div>
-
-      {/* KOL Funnel + Top KOLs */}
-      <div className="grid gap-5 lg:grid-cols-4">
-        {/* Funnel */}
-        <div className="card p-5">
-          <h3 className="text-sm font-semibold text-gray-900">KOL Lead Funnel</h3>
-          <p className="mt-0.5 mb-4 text-xs text-gray-400">All-time across all campaigns</p>
-          {kol ? (
-            <>
-              <KolFunnel kol={kol} />
-              <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-3 text-center">
-                <div>
-                  <p className="text-lg font-bold text-gray-900">{fmtCpl(kol.cpl)}</p>
-                  <p className="text-xs text-gray-400">Cost per Lead</p>
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-gray-900">{fmtPct(kol.testDriveRate)}</p>
-                  <p className="text-xs text-gray-400">Test Drive Rate</p>
-                </div>
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-gray-400">No data yet</p>
-          )}
-        </div>
-
-        {/* Top KOLs table */}
-        <div className="card overflow-hidden lg:col-span-3">
-          <div className="border-b border-gray-100 px-5 py-4">
-            <h3 className="text-sm font-semibold text-gray-900">KOL Performance Breakdown</h3>
-            <p className="mt-0.5 text-xs text-gray-400">Only KOLs with spend or leads are shown · Click column headers to sort</p>
-          </div>
-          <TopKolsTable rows={roi?.topKols ?? []} />
-        </div>
-      </div>
-
-      {/* Benchmark data management */}
-      <div className="card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">Benchmark Entries</h3>
-            <p className="mt-0.5 text-xs text-gray-400">Manually entered SEM / Meta / other channel data used for comparison above</p>
-          </div>
-        </div>
-        <BenchmarkList
+      {activeTab === 'benchmarks' && (
+        <BenchmarkTab
           benchmarks={roi?.benchmarks ?? []}
           onDelete={(id) => deleteMutation.mutate(id)}
+          onAdd={() => setShowModal(true)}
         />
-      </div>
+      )}
 
       {showModal && (
         <BenchmarkModal

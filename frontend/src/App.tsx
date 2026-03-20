@@ -9,6 +9,11 @@ import CampaignDetailPage from '@/pages/campaigns/CampaignDetailPage';
 import PortalPage from '@/pages/portal/PortalPage';
 import InfluencerSearchPage from '@/pages/influencer-search/InfluencerSearchPage';
 import ROIPage from '@/pages/ROIPage';
+import KolDetailPage from '@/pages/kols/KolDetailPage';
+import SettingsPage from '@/pages/settings/SettingsPage';
+import ReportsPage from '@/pages/reports/ReportsPage';
+import PaymentsPage from '@/pages/payments/PaymentsPage';
+import CalendarPage from '@/pages/calendar/CalendarPage';
 import type { ReactNode } from 'react';
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -19,7 +24,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 function RedirectIfAuth({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  if (isAuthenticated) return <Navigate to="/kols" replace />;
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -35,13 +40,18 @@ export default function App() {
 
         {/* Protected — inside admin layout */}
         <Route path="/" element={<RequireAuth><AdminLayout /></RequireAuth>}>
-          <Route index element={<Navigate to="/kols" replace />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="kols" element={<KolsPage />} />
+          <Route path="kols/:id" element={<KolDetailPage />} />
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="campaigns/:id" element={<CampaignDetailPage />} />
           <Route path="influencer-search" element={<InfluencerSearchPage />} />
           <Route path="roi" element={<ROIPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="payments" element={<PaymentsPage />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

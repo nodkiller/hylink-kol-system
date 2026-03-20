@@ -23,33 +23,86 @@ function formatDate(iso: string) {
   });
 }
 
-function JsonTextarea({ label, value, onChange }: {
-  label: string;
+// ─── Deliverables Checklist ───────────────────────────────────────────────────
+
+const DEFAULT_DELIVERABLES = ['Reel (60s)', 'Story x3', 'Static Post', 'TikTok Video', 'YouTube Short', 'Blog Post', 'Live Stream'];
+
+function DeliverablesChecklist({
+  value,
+  onChange,
+}: {
   value: Record<string, unknown>;
   onChange: (v: Record<string, unknown>) => void;
 }) {
-  const [text, setText] = useState(() => JSON.stringify(value, null, 2));
-  const [error, setError] = useState('');
+  // value is { [label]: boolean, ... }
+  const [newItem, setNewItem] = useState('');
 
-  useEffect(() => { setText(JSON.stringify(value, null, 2)); }, [value]);
+  // Get all keys: defaults + any custom ones in value
+  const allKeys = Array.from(new Set([
+    ...DEFAULT_DELIVERABLES,
+    ...Object.keys(value).filter((k) => !DEFAULT_DELIVERABLES.includes(k)),
+  ]));
 
-  const handleChange = (raw: string) => {
-    setText(raw);
-    try { setError(''); onChange(JSON.parse(raw)); }
-    catch { setError('Invalid JSON'); }
+  const toggle = (key: string) => {
+    onChange({ ...value, [key]: !value[key] });
   };
+
+  const addCustom = () => {
+    const trimmed = newItem.trim();
+    if (!trimmed) return;
+    onChange({ ...value, [trimmed]: false });
+    setNewItem('');
+  };
+
+  const doneCount = allKeys.filter((k) => value[k]).length;
 
   return (
     <div>
-      <label className="label">{label}</label>
-      <textarea
-        rows={4}
-        value={text}
-        onChange={(e) => handleChange(e.target.value)}
-        className={clsx('input mt-1 font-mono text-xs resize-y', error && 'border-red-400')}
-        spellCheck={false}
-      />
-      {error && <p className="mt-0.5 text-xs text-red-500">{error}</p>}
+      <div className="flex items-center justify-between mb-2">
+        <label className="label">Deliverables Checklist</label>
+        <span className="text-xs text-gray-400">{doneCount}/{allKeys.length} done</span>
+      </div>
+      <div className="rounded-xl border border-gray-200 overflow-hidden">
+        {allKeys.map((key, i) => (
+          <label
+            key={key}
+            className={clsx(
+              'flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors',
+              i > 0 && 'border-t border-gray-100',
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={Boolean(value[key])}
+              onChange={() => toggle(key)}
+              className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className={clsx(
+              'text-sm flex-1',
+              value[key] ? 'line-through text-gray-400' : 'text-gray-700',
+            )}>
+              {key}
+            </span>
+          </label>
+        ))}
+        {/* Add custom */}
+        <div className="border-t border-gray-100 flex items-center gap-2 px-3 py-2">
+          <input
+            type="text"
+            placeholder="Add custom deliverable…"
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
+            className="flex-1 text-sm bg-transparent focus:outline-none placeholder-gray-300 text-gray-700"
+          />
+          <button
+            onClick={addCustom}
+            className="text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors px-1"
+          >
+            + Add
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -350,7 +403,7 @@ export default function KolDetailDrawer({ record, campaignId, onClose }: Props) 
           </div>
 
           {/* Deliverables */}
-          <JsonTextarea label="Deliverables (JSON)" value={deliverables} onChange={setDeliverables} />
+          <DeliverablesChecklist value={deliverables} onChange={setDeliverables} />
 
           {/* Post Results */}
           <div className="border-t border-gray-100 pt-5">

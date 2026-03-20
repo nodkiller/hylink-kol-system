@@ -10,29 +10,30 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.22.0",
-    "axios": "^1.6.7",
-    "zustand": "^4.5.2",
-    "@tanstack/react-query": "^5.28.0",
-    "@tanstack/react-table": "^8.15.0",
-    "react-hook-form": "^7.51.0",
-    "zod": "^3.22.4",
-    "@hookform/resolvers": "^3.3.4",
-    "clsx": "^2.1.0",
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "recharts": "^2.12.0"
+    "@hookform/resolvers": "^3.3.4",
+    "@tanstack/react-query": "^5.28.0",
+    "@tanstack/react-table": "^8.15.0",
+    "axios": "^1.6.7",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.577.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.51.0",
+    "react-router-dom": "^6.22.0",
+    "recharts": "^2.12.0",
+    "zod": "^3.22.4",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.2.0",
-    "typescript": "^5.4.2",
-    "tailwindcss": "^3.4.3",
+    "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
-    "autoprefixer": "^10.4.19"
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.2",
+    "vite": "^5.2.0"
   }
 }

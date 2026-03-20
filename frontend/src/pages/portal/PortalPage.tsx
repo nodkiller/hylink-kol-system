@@ -203,6 +203,14 @@ function FeedbackControls({
   );
 }
 
+// ─── Follower format ──────────────────────────────────────────────────────────
+
+function fmtF(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
+  return String(n);
+}
+
 // ─── KOL card (portal view) ───────────────────────────────────────────────────
 
 function PortalKolCard({
@@ -218,70 +226,94 @@ function PortalKolCard({
 }) {
   const kol = record.kol;
   const platforms = [...(kol.platforms ?? [])].sort((a, b) => (b.followersCount ?? 0) - (a.followersCount ?? 0));
+  const top = platforms[0];
+
+  const feedbackBorder = record.clientFeedback === 'Approved'
+    ? 'border-green-300 ring-1 ring-green-200'
+    : record.clientFeedback === 'Rejected'
+      ? 'border-red-200 opacity-75'
+      : 'border-gray-200';
 
   return (
-    <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-      {/* Card header */}
+    <div className={clsx('rounded-2xl bg-white border shadow-sm overflow-hidden flex flex-col transition-all', feedbackBorder)}>
+      {/* Status banner */}
+      {record.clientFeedback && (
+        <div className={clsx(
+          'px-4 py-1.5 text-xs font-semibold text-center',
+          record.clientFeedback === 'Approved' ? 'bg-green-500 text-white' : 'bg-red-400 text-white',
+        )}>
+          {record.clientFeedback === 'Approved' ? '✓ Approved' : '✗ Rejected'}
+        </div>
+      )}
+
+      {/* Card body */}
       <div className="p-5 flex-1 space-y-4">
-        {/* Avatar + name */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700 text-lg font-bold">
-            {kol.name.charAt(0)}
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate">{kol.name}</h3>
-            {kol.nickname && (
-              <p className="text-sm text-gray-400">@{kol.nickname}</p>
-            )}
+        {/* Avatar + name + tier */}
+        <div className="flex items-start gap-3">
+          {kol.avatarUrl ? (
+            <img src={kol.avatarUrl} alt={kol.name} className="h-14 w-14 flex-shrink-0 rounded-xl object-cover border border-gray-100" />
+          ) : (
+            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 text-white text-xl font-bold shadow-sm">
+              {kol.name.charAt(0)}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-gray-900 truncate text-base">{kol.name}</h3>
+            {kol.nickname && <p className="text-sm text-gray-400">@{kol.nickname}</p>}
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              {kol.kolTier && (
+                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-600 border border-indigo-100">
+                  {kol.kolTier}
+                </span>
+              )}
+              {(kol.city || kol.country) && (
+                <span className="text-[11px] text-gray-400 flex items-center gap-0.5">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {[kol.city, kol.country].filter(Boolean).join(', ')}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Tags */}
-        {kol.contentTags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {kol.contentTags.slice(0, 4).map((tag) => (
-              <span key={tag} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">
-                {tag}
-              </span>
-            ))}
+        {/* Top platform stats */}
+        {top && (
+          <div className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5 flex items-center justify-between">
+            <span className="text-xs font-semibold text-gray-600">{top.platformName}</span>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              {top.followersCount != null && (
+                <span className="font-bold text-gray-800">{fmtF(top.followersCount)} <span className="font-normal text-gray-400">followers</span></span>
+              )}
+              {top.avgEngagementRate != null && (
+                <span className="text-primary-600 font-semibold">{(top.avgEngagementRate * 100).toFixed(1)}% eng</span>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Platforms */}
-        {platforms.length > 0 && (
-          <div className="space-y-1.5">
-            {platforms.map((p) => (
-              <div key={p.platformName} className="flex items-center justify-between text-sm">
-                <span className="font-medium text-gray-700">{p.platformName}</span>
-                <div className="text-right text-gray-500 text-xs">
-                  {p.followersCount != null && (
-                    <span>
-                      {p.followersCount >= 1_000_000
-                        ? `${(p.followersCount / 1_000_000).toFixed(1)}M`
-                        : p.followersCount >= 1000
-                          ? `${(p.followersCount / 1000).toFixed(0)}K`
-                          : p.followersCount}{' '}
-                      followers
-                    </span>
-                  )}
-                  {p.avgEngagementRate != null && (
-                    <span className="ml-2">{(p.avgEngagementRate * 100).toFixed(1)}% eng</span>
-                  )}
-                </div>
+        {/* Other platforms */}
+        {platforms.length > 1 && (
+          <div className="space-y-1">
+            {platforms.slice(1).map((p) => (
+              <div key={p.platformName} className="flex items-center justify-between text-xs text-gray-500">
+                <span className="text-gray-500">{p.platformName}</span>
+                <span>{p.followersCount != null ? fmtF(p.followersCount) : '—'}</span>
               </div>
             ))}
           </div>
         )}
 
-        {/* Location */}
-        {(kol.city || kol.country) && (
-          <p className="text-xs text-gray-400 flex items-center gap-1">
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {[kol.city, kol.country].filter(Boolean).join(', ')}
-          </p>
+        {/* Tags */}
+        {kol.contentTags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {kol.contentTags.slice(0, 5).map((tag) => (
+              <span key={tag} className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs text-amber-700 border border-amber-100">
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
@@ -300,6 +332,8 @@ function PortalKolCard({
 
 // ─── Authenticated portal view ─────────────────────────────────────────────────
 
+type FilterTab = 'all' | 'pending' | 'approved' | 'rejected';
+
 function PortalView({
   campaignId,
   campaignName,
@@ -311,6 +345,8 @@ function PortalView({
   password: string;
   onLogout: () => void;
 }) {
+  const [filterTab, setFilterTab] = useState<FilterTab>('all');
+
   const { data: records = [], isLoading, refetch } = useQuery({
     queryKey: ['portal-shortlist', campaignId],
     queryFn: () => portalApi.getShortlist(campaignId, password),
@@ -319,46 +355,80 @@ function PortalView({
   const approvedCount = records.filter((r) => r.clientFeedback === 'Approved').length;
   const rejectedCount = records.filter((r) => r.clientFeedback === 'Rejected').length;
   const pendingCount = records.filter((r) => !r.clientFeedback).length;
+  const reviewedCount = approvedCount + rejectedCount;
+  const progressPct = records.length > 0 ? Math.round((reviewedCount / records.length) * 100) : 0;
+
+  const filtered = records.filter((r) => {
+    if (filterTab === 'pending') return !r.clientFeedback;
+    if (filterTab === 'approved') return r.clientFeedback === 'Approved';
+    if (filterTab === 'rejected') return r.clientFeedback === 'Rejected';
+    return true;
+  });
+
+  const filterTabs: { id: FilterTab; label: string; count: number; color: string }[] = [
+    { id: 'all', label: 'All', count: records.length, color: 'text-gray-600' },
+    { id: 'pending', label: 'Pending', count: pendingCount, color: 'text-amber-600' },
+    { id: 'approved', label: 'Approved', count: approvedCount, color: 'text-green-600' },
+    { id: 'rejected', label: 'Rejected', count: rejectedCount, color: 'text-red-600' },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">KOL Review Portal</p>
-            <h1 className="text-lg font-bold text-gray-900 truncate">{campaignName}</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Summary pills */}
-            <div className="hidden sm:flex items-center gap-2 text-xs">
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-600 font-medium">
-                {records.length} KOLs
-              </span>
-              {approvedCount > 0 && (
-                <span className="rounded-full bg-green-100 px-2.5 py-1 text-green-700 font-medium">
-                  {approvedCount} approved
-                </span>
-              )}
-              {rejectedCount > 0 && (
-                <span className="rounded-full bg-red-100 px-2.5 py-1 text-red-700 font-medium">
-                  {rejectedCount} rejected
-                </span>
-              )}
-              {pendingCount > 0 && (
-                <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-yellow-700 font-medium">
-                  {pendingCount} pending
-                </span>
-              )}
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">KOL Review Portal</p>
+              <h1 className="text-lg font-bold text-gray-900 truncate">{campaignName}</h1>
             </div>
-            <button
-              onClick={onLogout}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
+            <button onClick={onLogout} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
               Exit
             </button>
           </div>
+
+          {/* Progress bar */}
+          {records.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs text-gray-500">{reviewedCount} of {records.length} reviewed</span>
+                <span className="text-xs font-semibold text-primary-600">{progressPct}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-400 transition-all duration-500"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Filter tabs */}
+        {records.length > 0 && (
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 flex gap-1 overflow-x-auto pb-0">
+            {filterTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilterTab(tab.id)}
+                className={clsx(
+                  'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
+                  filterTab === tab.id
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700',
+                )}
+              >
+                {tab.label}
+                <span className={clsx(
+                  'rounded-full px-1.5 py-0.5 text-xs font-semibold',
+                  filterTab === tab.id ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500',
+                )}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Content */}
@@ -380,19 +450,26 @@ function PortalView({
         ) : (
           <>
             <p className="mb-6 text-sm text-gray-500">
-              Please review the KOLs below and submit your approval or rejection for each one. Your feedback will be shared directly with the team.
+              Please review the KOLs below and submit your approval or rejection for each one.{' '}
+              {pendingCount > 0 && <span className="font-medium text-amber-600">{pendingCount} awaiting your feedback.</span>}
             </p>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {records.map((record) => (
-                <PortalKolCard
-                  key={record.kolId}
-                  record={record}
-                  campaignId={campaignId}
-                  password={password}
-                  onFeedbackSent={() => refetch()}
-                />
-              ))}
-            </div>
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                <p className="text-sm">No KOLs in this category</p>
+              </div>
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((record) => (
+                  <PortalKolCard
+                    key={record.kolId}
+                    record={record}
+                    campaignId={campaignId}
+                    password={password}
+                    onFeedbackSent={() => refetch()}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
       </main>
